@@ -11,7 +11,7 @@ theory.
 | Path | What it is |
 |---|---|
 | `report/MBA680_PS2_Report.docx` | The report: instrument, method, results, recommendations |
-| `portal/index.html` | The interactive robo-advisory portal, ready for GitHub Pages |
+| `docs/index.html` | The interactive robo-advisory portal, ready for GitHub Pages |
 | `engine/` | The estimation and portfolio engine, and everything that feeds the report |
 | `figures/` | Figures 1 to 10, regenerated from the engine outputs |
 

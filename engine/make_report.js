@@ -703,7 +703,7 @@ doc.push(P("Rated 1 (disagree strongly) to 5 (agree strongly). Items marked R ar
   + "submitted dataset, administer the official BFI-2-S from the Colby personality lab and enter the "
   + "domain scores directly.", { size: 19 }));
 
-const portalHtml = fs.readFileSync(path.join(HERE, "..", "portal", "index.html"), "utf8");
+const portalHtml = fs.readFileSync(path.join(HERE, "..", "docs", "index.html"), "utf8");
 const bfiBlock = portalHtml.match(/const BFI = \[([\s\S]*?)\n\];/)[1];
 const bfiItems = [];
 bfiBlock.split("\n").forEach(line => {

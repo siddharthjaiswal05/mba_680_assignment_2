@@ -1,5 +1,5 @@
 """
-Rewrites the PILOT block inside portal/index.html from responses.json.
+Rewrites the PILOT block inside docs/index.html from responses.json.
 
 The portal ships the pilot peer group so its group view is never empty. Typing
 that data in by hand is how the portal and the report quietly drift apart, so it
@@ -16,7 +16,7 @@ import os
 import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PORTAL = os.path.abspath(os.path.join(HERE, "..", "portal", "index.html"))
+PORTAL = os.path.abspath(os.path.join(HERE, "..", "docs", "index.html"))
 
 GOAL_MAP = {"Specified goal": "A specific purchase"}
 
