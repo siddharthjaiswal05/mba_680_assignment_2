@@ -15,6 +15,24 @@ const A = JSON.parse(fs.readFileSync(path.join(HERE, "outputs", "classform.json"
 const R = A.results, ADV = A.constants.advice, ENG = A.engines[ADV];
 const by = Object.fromEntries(R.map(r => [r.roll, r]));
 
+const RISK_CERTAIN=[10000,12000,15000,20000,25000,30000,40000,50000];
+const TIME_OFFERS=[[10500,1],[11000,1],[12000,1],[13000,1],[15000,2],[18000,2]];
+const VF_C=[10000,20000,30000];
+/* Read the item list out of the portal so the report and the survey cannot disagree. */
+const BFI_ITEMS=(()=>{
+  const src=fs.readFileSync(path.join(HERE,"..","docs","survey.js"),"utf8");
+  const blk=src.match(/const BFI = \[([\s\S]*?)\n\];/)[1];
+  const D2={E:"Extraversion",A:"Agreeableness",C:"Conscientiousness",
+            N:"Negative Emotionality",O:"Open-Mindedness"};
+  const out=[];
+  blk.split("\n").forEach(line=>{
+    const m=line.match(/\{n:(\d+),\s*d:"(\w)",\s*f:"([^"]+)",\s*t:"([^"]+)"(,\s*r:1)?\}/);
+    if(m) out.push({n:+m[1],dom:D2[m[2]],facet:m[3],text:m[4],r:!!m[5]});
+  });
+  if(out.length!==30) throw new Error("expected 30 BFI items, parsed "+out.length);
+  return out;
+})();
+
 const pct = (x,d=1) => x==null ? "n/a" : (x*100).toFixed(d)+"%";
 const f2 = x => x==null ? "n/a" : Number(x).toFixed(2);
 const inr = x => { if(x==null) return "n/a"; const n=Math.round(x);
@@ -424,7 +442,77 @@ doc.push(H("9. References"));
   indent:{left:340,hanging:340},
   children:[new TextRun({text:t,size:19,color:INK})]})));
 
-doc.push(H("Appendix. Reproducing every number"));
+doc.push(new Paragraph({children:[new PageBreak()]}));
+doc.push(H("Appendix A. The survey, as administered"));
+doc.push(P("Reproduced exactly as respondents saw it. Sections A.1 to A.5 are the class form. "
+  + "Section A.6 holds the four added questions, which are marked as extensions in the portal so a "
+  + "respondent can see which part of the form is standard and which is not."));
+
+doc.push(H("A.1 Participant information", 2));
+doc.push(P("Roll number (used instead of a name so the data set stays anonymous), age, monthly "
+  + "income band, amount available to invest, investing experience (none, limited, moderate or "
+  + "substantial), horizon in years, primary goal (wealth creation, capital preservation, liquidity "
+  + "or a specific goal), and any constraint or liquidity need."));
+
+doc.push(H("A.2 Risk preference, R1 to R8", 2));
+doc.push(P("For each row, pick exactly one.", {size:19}));
+doc.push(table([700,2700,4100],["Q","A: certain","B: coin flip"],
+  RISK_CERTAIN.map((x,i)=>[`R${i+1}`, `Rs ${x.toLocaleString("en-IN")} guaranteed`,
+    `50% Rs ${(2*x).toLocaleString("en-IN")}, 50% Rs 0`]), {band:true, rightFrom:99}));
+
+doc.push(H("A.3 Time preference, T1 to T6", 2));
+doc.push(P("For each row, pick the amount you would rather receive.", {size:19}));
+doc.push(table([700,2100,2100,1500,1800],["Q","Amount today","Delayed amount","Delay","Implied annual rate"],
+  TIME_OFFERS.map(([fv,t],i)=>[`T${i+1}`,"Rs 10,000",`Rs ${fv.toLocaleString("en-IN")}`,
+    t===1?"1 year":`${t} years`, ((fv/10000)**(1/t)-1).toLocaleString("en-US",{style:"percent",minimumFractionDigits:1})]),
+  {band:true, rightFrom:4}));
+doc.push(...NOTE(["PV = FV / (1 + r)^t      so for PV = Rs 10,000:   r = (FV / 10,000)^(1/t) - 1"],{mono:true}));
+
+doc.push(H("A.4 Personality, the 30-item BFI-2 subset", 2));
+doc.push(P("Rated 1 (disagree strongly) to 5 (agree strongly). Items marked r are reverse keyed, so "
+  + "the score is 6 minus the response. A facet score is the mean of its two items and a domain "
+  + "score is the mean of its six. This is a project-specific subset of the official 60-item BFI-2 "
+  + "pool, not the validated short form.", {size:19}));
+doc.push(table([800,1700,1900,3500],["Item","Domain","Facet","Statement"],
+  BFI_ITEMS.map(it=>[String(it.n)+(it.r?"r":""), it.dom, it.facet, it.text]),
+  {band:true, rightFrom:99}));
+
+doc.push(H("A.5 Utility and value function, U1 to U6 and V1 to V6", 2));
+doc.push(P("The respondent first sets the lowest and highest amounts that feel relevant, A and B, "
+  + "with U(A) = 0 and U(B) = 1. Six intermediate amounts are then spaced across that range. For "
+  + "each one the respondent moves a slider to the probability of B that makes the certain amount "
+  + "and the gamble feel equal. At indifference U(X) = p.", {size:19}));
+doc.push(table([700,3000,4800],["Q","Certain outcome X","Gamble"],
+  [1,2,3,4,5,6].map(k=>[`U${k}`,`Intermediate ${k}, spaced between A and B`,
+    "A with probability 1 - p, B with probability p"]), {band:true, rightFrom:99}));
+doc.push(P("The lecture's worked example uses A = Rs 10,000 and B = Rs 50,000, where indifference "
+  + "at p = 0.5 gives U(Rs 20,000) = 0.5. That is the default range in the portal.", {size:19}));
+doc.push(P("The value function section first asks for a reference amount W0, then presents six "
+  + "rows. Each offers a certain outcome against a gamble paying double or nothing, and the "
+  + "respondent gives the probability at indifference.", {size:19}));
+doc.push(table([700,3300,4500],["Q","Certain choice","Risky choice"],
+  [...VF_C.map((x,i)=>[`V${i+1}`,`Guaranteed gain of Rs ${x.toLocaleString("en-IN")}`,
+     `50% gain Rs ${(2*x).toLocaleString("en-IN")}, 50% gain Rs 0`]),
+   ...VF_C.map((x,i)=>[`V${i+4}`,`Guaranteed loss of Rs ${x.toLocaleString("en-IN")}`,
+     `50% loss Rs ${(2*x).toLocaleString("en-IN")}, 50% loss Rs 0`])],
+  {band:true, rightFrom:99}));
+
+doc.push(H("A.6 The four added questions", 2));
+doc.push(P("Not part of the class form. Section 6.3 explains why each is needed.", {size:19}));
+doc.push(table([700,4400,3600],["Q","Question","What it identifies"],[
+  ["E1","A coin flip. Tails, you lose Rs 10,000. Heads, you win G. How big does G have to be before you would take the bet?","Loss aversion lambda"],
+  ["E2a","You have a 10 in 100 chance of winning Rs 10,000, otherwise nothing. What amount, given for sure, would feel just as good?","One point of the probability weighting function"],
+  ["E2b","The same question at 90 in 100.","The second point, which fits the weighting curvature"],
+  ["E3a","What is the smallest amount you must still have at the end?","The floor for the safety layer"],
+  ["E3b","How often could you live with falling below it? (1 in 50, 1 in 20, 1 in 10, 1 in 5, 1 in 4)","The shortfall tolerance"],
+  ["E4a","What amount at the end would make you call this a success?","The aspiration level"],
+  ["E4b","Split 100 points between staying safe and having a real shot at that number.","The security and potential weight in SP/A"],
+  ["E4c","How much expected end wealth would you give up to raise your chance of hitting it by 10 points?","The weight on aspiration"],
+  ["E5","Do you need to take money out each year, and how much?","The income layer"],
+], {band:true, rightFrom:99}));
+
+doc.push(new Paragraph({children:[new PageBreak()]}));
+doc.push(H("Appendix B. Reproducing every number"));
 doc.push(P("Three commands, in order. Each reads only the output of the one before it.",{size:19}));
 [["responses_real.json","The fielded responses, transcribed from the submitted surveys. Fields the class form does not ask are null, and invalid submissions are null with the reason attached."],
  ["classform_engine.py","Estimates everything the instrument identifies, builds the Step 5 portfolios, and writes outputs/classform.json and the figures."],
