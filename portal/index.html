@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Layered</title>
+<meta name="description" content="A robo-advisory prototype that elicits risk, time and personality preferences and returns both a mean-variance and a behavioral portfolio.">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f6f6f4; --surface:#ffffff; --surface-2:#fbfbfa;
+  --ink:#0b0b0b; --ink-2:#52514e; --ink-3:#8a8985;
+  --line:#e4e3df; --line-2:#d3d2cd;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+  --good:#1baf7a; --warn:#eda100; --bad:#e34948;
+  --accent:var(--s1);
+  --r:10px; --shadow:0 1px 2px rgba(0,0,0,.05), 0 8px 24px -12px rgba(0,0,0,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#131312; --surface:#1c1c1a; --surface-2:#232321;
+    --ink:#f4f4f1; --ink-2:#b9b8b1; --ink-3:#8b8a84;
+    --line:#32312d; --line-2:#413f3a;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s5:#d55181; --s6:#3ea83e; --s7:#9085e9; --s8:#e66767;
+    --good:#199e70; --warn:#c98500; --bad:#e66767;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#131312; --surface:#1c1c1a; --surface-2:#232321;
+  --ink:#f4f4f1; --ink-2:#b9b8b1; --ink-3:#8b8a84;
+  --line:#32312d; --line-2:#413f3a;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s5:#d55181; --s6:#3ea83e; --s7:#9085e9; --s8:#e66767;
+  --good:#199e70; --warn:#c98500; --bad:#e66767;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.55; letter-spacing:-0.005em;
+}
+.wrap{max-width:1000px; margin:0 auto; padding:0 16px 96px;}
+a{color:var(--accent);}
+
+/* ---------- header ---------- */
+header{
+  position:sticky; top:0; z-index:40; background:var(--bg);
+  border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top,0);
+}
+.hdr{max-width:1000px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; gap:12px;}
+.brand{display:flex; align-items:baseline; gap:9px; margin-right:auto; min-width:0;}
+.brand b{font-size:17px; font-weight:650; letter-spacing:-0.02em;}
+.brand span{font-size:12.5px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.tabs{display:flex; gap:2px; background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:3px;}
+.tabs button{
+  border:0; background:transparent; color:var(--ink-2); font:inherit; font-size:13px;
+  padding:6px 13px; border-radius:6px; cursor:pointer; white-space:nowrap;
+}
+.tabs button[aria-selected="true"]{background:var(--surface); color:var(--ink); font-weight:560; box-shadow:0 1px 2px rgba(0,0,0,.06);}
+.icon-btn{
+  border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+  width:34px; height:34px; border-radius:8px; cursor:pointer; font-size:15px; line-height:1;
+  display:grid; place-items:center; flex:none;
+}
+.bar{height:3px; background:var(--line);}
+.bar i{display:block; height:100%; background:var(--accent); width:0; transition:width .3s ease;}
+
+/* ---------- blocks ---------- */
+h1{font-size:25px; font-weight:660; letter-spacing:-0.025em; margin:26px 0 6px;}
+h2{font-size:18px; font-weight:620; letter-spacing:-0.02em; margin:0 0 3px;}
+h3{font-size:14px; font-weight:620; margin:20px 0 8px; color:var(--ink);}
+.lede{color:var(--ink-2); font-size:14.5px; max-width:66ch; margin:0 0 22px;}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:20px; margin-bottom:14px;}
+.card>.hd{display:flex; align-items:baseline; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+.card>.hd .num{
+  font-size:11px; font-weight:700; color:var(--accent); background:color-mix(in srgb,var(--accent) 12%, transparent);
+  border-radius:5px; padding:2px 7px; letter-spacing:.04em;
+}
+.card>.hd p{margin:2px 0 0; color:var(--ink-2); font-size:13.5px; flex-basis:100%;}
+.muted{color:var(--ink-2);} .tiny{font-size:12.5px; color:var(--ink-3);}
+
+/* ---------- form ---------- */
+.grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));}
+label.f{display:block; font-size:12.5px; color:var(--ink-2); margin-bottom:5px; font-weight:500;}
+input,select,textarea{
+  width:100%; padding:9px 11px; font:inherit; font-size:14px; color:var(--ink);
+  background:var(--surface-2); border:1px solid var(--line-2); border-radius:8px;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:transparent;}
+input[type=range]{padding:0; background:transparent; border:0;}
+.q{padding:14px 0; border-top:1px solid var(--line);}
+.q:first-of-type{border-top:0; padding-top:0;}
+.q .qt{font-size:14px; margin-bottom:4px;}
+.q .qh{font-size:12.5px; color:var(--ink-3); margin-bottom:9px;}
+.inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.inline .unit{color:var(--ink-3); font-size:13px;}
+.w-sm{max-width:180px;}
+
+/* likert */
+.lik{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:9px 0; border-top:1px solid var(--line);}
+.lik:first-child{border-top:0;}
+.lik .t{font-size:13.8px;}
+.lik .opts{display:flex; gap:4px;}
+.lik input{display:none;}
+.lik .opts label{
+  width:32px; height:32px; display:grid; place-items:center; cursor:pointer; font-size:12.5px;
+  border:1px solid var(--line-2); border-radius:7px; color:var(--ink-3); background:var(--surface-2);
+}
+.lik input:checked + label{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;}
+@media(max-width:560px){ .lik{grid-template-columns:1fr;} .lik .opts{justify-content:space-between;} .lik .opts label{flex:1;} }
+
+/* ladder */
+.ladder{width:100%; border-collapse:separate; border-spacing:0; font-size:13.5px;}
+.ladder th{text-align:left; font-weight:560; color:var(--ink-2); font-size:12.5px; padding:0 8px 8px; border-bottom:1px solid var(--line);}
+.ladder td{padding:7px 8px; border-bottom:1px solid var(--line);}
+.ladder tr:last-child td{border-bottom:0;}
+.ladder tr.on td{background:color-mix(in srgb,var(--accent) 7%, transparent);}
+.ladder .pick{display:flex; gap:5px;}
+.ladder .pick input{display:none;}
+.ladder .pick label{
+  padding:4px 11px; font-size:12.5px; border:1px solid var(--line-2); border-radius:6px;
+  cursor:pointer; color:var(--ink-3); background:var(--surface-2); white-space:nowrap;
+}
+.ladder .pick input:checked + label{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:560;}
+
+/* buttons */
+.btn{
+  border:1px solid transparent; background:var(--accent); color:#fff; font:inherit; font-size:14px;
+  font-weight:560; padding:10px 18px; border-radius:8px; cursor:pointer;
+}
+.btn.ghost{background:var(--surface); color:var(--ink); border-color:var(--line-2);}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+
+/* results */
+.tiles{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-bottom:14px;}
+.tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:15px 16px;}
+.tile .k{font-size:11.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.tile .v{font-size:25px; font-weight:640; letter-spacing:-0.03em; margin:4px 0 1px; font-variant-numeric:tabular-nums;}
+.tile .s{font-size:12.5px; color:var(--ink-2);}
+table.data{width:100%; border-collapse:collapse; font-size:13.5px; font-variant-numeric:tabular-nums;}
+table.data th{text-align:left; font-weight:560; color:var(--ink-2); font-size:12px; text-transform:uppercase; letter-spacing:.04em; padding:0 10px 8px 0; border-bottom:1px solid var(--line-2);}
+table.data td{padding:9px 10px 9px 0; border-bottom:1px solid var(--line);}
+table.data td.n, table.data th.n{text-align:right;}
+table.data tr:last-child td{border-bottom:0;}
+.swatch{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:7px; vertical-align:baseline;}
+.overflow{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+.stack{display:flex; height:30px; border-radius:7px; overflow:hidden; gap:2px; background:var(--line); margin:10px 0 6px;}
+.stack div{display:grid; place-items:center; font-size:11.5px; font-weight:600; color:#fff; min-width:0; overflow:hidden;}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2); margin-top:8px;}
+.legend i{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px;}
+
+.note{border-left:2px solid var(--line-2); padding:2px 0 2px 14px; margin:14px 0; color:var(--ink-2); font-size:13.5px;}
+.adv{border:1px solid var(--line); border-radius:var(--r); padding:15px 17px; margin-bottom:10px; background:var(--surface);}
+.adv .h{font-size:14px; font-weight:620; margin-bottom:5px;}
+.adv .d{font-size:11px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600; margin-bottom:7px;}
+.adv .b{font-size:13.5px; color:var(--ink-2);}
+.pill{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 9px; border-radius:20px; border:1px solid var(--line-2); color:var(--ink-2);}
+.pill.ok{color:var(--good); border-color:color-mix(in srgb,var(--good) 40%, transparent); background:color-mix(in srgb,var(--good) 10%, transparent);}
+.pill.no{color:var(--bad); border-color:color-mix(in srgb,var(--bad) 40%, transparent); background:color-mix(in srgb,var(--bad) 10%, transparent);}
+
+svg.chart{width:100%; height:auto; display:block; overflow:visible;}
+svg.chart text{font-family:inherit; fill:var(--ink-2);}
+svg .gridline{stroke:var(--line); stroke-width:1;}
+svg .axis{stroke:var(--line-2); stroke-width:1;}
+.chartwrap{margin:6px 0 4px;}
+.cap{font-size:12.5px; color:var(--ink-3); margin-top:6px;}
+.charts2{display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(290px,1fr));}
+
+.hide{display:none !important;}
+footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-3);}
+.toast{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:24px; z-index:90;
+  background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:8px; font-size:13.5px;
+  box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .2s, bottom .2s;
+}
+.toast.on{opacity:1; bottom:34px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div class="brand"><b>Layered</b><span>MBA680 robo-advisory prototype</span></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-survey" aria-selected="true">Survey</button>
+      <button role="tab" id="t-plan" aria-selected="false">My plan</button>
+      <button role="tab" id="t-group" aria-selected="false">Peer group</button>
+      <button role="tab" id="t-method" aria-selected="false">Method</button>
+    </div>
+    <button class="icon-btn" id="theme" title="Switch theme" aria-label="Switch theme">◐</button>
+  </div>
+  <div class="bar"><i id="prog"></i></div>
+</header>
+
+<div class="wrap">
+
+<!-- ================================================== SURVEY ============ -->
+<section id="p-survey">
+  <h1>Build me a portfolio</h1>
+  <p class="lede">
+    Eight short sections. They measure how you trade off risk, how you trade off time,
+    how you feel about losses as against gains, how you read probabilities, and where
+    you sit on the five personality domains. At the end the portal fits your utility
+    and value functions and builds you two portfolios: the one expected utility theory
+    says you should hold, and the one behavioral portfolio theory says you will
+    actually hold. Nothing leaves this device until you export it.
+  </p>
+
+  <div class="card">
+    <div class="hd"><span class="num">01</span><h2>About you</h2>
+      <p>The corpus and the horizon set the scale for everything that follows.</p></div>
+    <div class="grid">
+      <div><label class="f" for="f_id">Roll number or initials</label><input id="f_id" placeholder="e.g. 231005"></div>
+      <div><label class="f" for="f_name">Name (optional)</label><input id="f_name" placeholder="Not used in the analysis"></div>
+      <div><label class="f" for="f_age">Age</label><input id="f_age" type="number" min="16" max="90" value="23"></div>
+      <div><label class="f" for="f_corpus">Amount you are investing (₹)</label><input id="f_corpus" type="number" min="10000" step="10000" value="1000000"></div>
+      <div><label class="f" for="f_horizon">Horizon (years)</label><input id="f_horizon" type="number" min="1" max="40" value="5"></div>
+      <div><label class="f" for="f_goal">Primary goal</label><select id="f_goal">
+        <option>Wealth creation</option><option>Capital preservation</option>
+        <option>A specific purchase</option><option>Regular income</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="num">02</span><h2>Risk ladder</h2>
+      <p>Each row is the same offer: leave your corpus untouched, or take a coin flip
+      that loses 10% of it on tails and gains the listed amount on heads. Work down the
+      rows and pick the first one you would accept. The row you switch at brackets your
+      relative risk aversion.</p></div>
+    <div class="overflow"><table class="ladder"><thead><tr>
+      <th style="width:34px">#</th><th>Heads, you gain</th><th>Tails, you lose</th><th>Your choice</th>
+    </tr></thead><tbody id="ladder"></tbody></table></div>
+    <p class="tiny" style="margin-top:12px">If you would refuse every row, pick refuse on all ten.</p>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="num">03</span><h2>Time preference</h2>
+      <p>Two questions. The gap between them separates impatience you feel only about
+      today from the rate at which you discount the future generally.</p></div>
+    <div class="q">
+      <div class="qt">You can have ₹10,000 today, or a larger amount in one month.</div>
+      <div class="qh">What is the smallest amount in one month that would make you wait?</div>
+      <div class="inline"><span class="unit">₹</span><input id="f_td1" class="w-sm" type="number" min="10000" step="100" value="10500"></div>
+    </div>
+    <div class="q">
+      <div class="qt">You can have ₹10,000 in twelve months, or a larger amount in thirteen months.</div>
+      <div class="qh">What is the smallest amount in thirteen months that would make you wait the extra month?</div>
+      <div class="inline"><span class="unit">₹</span><input id="f_td13" class="w-sm" type="number" min="10000" step="10" value="10150"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="num">04</span><h2>Personality</h2>
+      <p>Thirty statements. Say how much each one describes you, from 1 (disagree
+      strongly) to 5 (agree strongly). Answer quickly; first reactions score better
+      than considered ones.</p></div>
+    <div id="bfi"></div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="num">05</span><h2>Your utility function</h2>
+      <p>Five questions, all the same shape. You are offered a certain amount, or a
+      gamble between the best and worst outcomes on the table. Move the slider to the
+      chance of the best outcome that leaves you exactly indifferent. That probability
+      is your utility for the certain amount, which is what lets the portal draw the
+      curve rather than assume it.</p></div>
+    <div id="util"></div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="num">06</span><h2>Your value function</h2>
+      <p>The same method, but now measured as gains and losses from where you stand
+      today rather than as levels of wealth. This is the part that separates prospect
+      theory from expected utility theory.</p></div>
+    <div id="vf"></div>
+    <div class="q">
+      <div class="qt">A coin flip: tails you lose ₹10,000, heads you win G.</div>
+      <div class="qh">What is the smallest G at which you would take the bet?</div>
+      <div class="inline"><span class="unit">₹</span><input id="f_mixed" class="w-sm" type="number" min="1000" step="500" value="25000"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="num">07</span><h2>How you read probabilities</h2>
+      <p>Two certainty equivalents. Together they reveal whether you overweight long
+      shots and underweight near-certainties, which almost everyone does.</p></div>
+    <div id="pw"></div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="num">08</span><h2>Floors, income and aspiration</h2>
+      <p>Behavioral portfolio theory needs to know what you are protecting and what
+      you are reaching for. These are the numbers that build the layers.</p></div>
+    <div class="grid">
+      <div><label class="f" for="f_floor">The amount you must still have at the end, whatever happens (₹)</label>
+        <input id="f_floor" type="number" min="0" step="10000" value="700000"></div>
+      <div><label class="f" for="f_alpha">Largest chance of falling below it you could live with</label>
+        <select id="f_alpha"><option value="0.02">1 in 50 (2%)</option><option value="0.05">1 in 20 (5%)</option>
+        <option value="0.10" selected>1 in 10 (10%)</option><option value="0.20">1 in 5 (20%)</option>
+        <option value="0.25">1 in 4 (25%)</option></select></div>
+      <div><label class="f" for="f_income">Cash you need to draw each year (₹)</label>
+        <input id="f_income" type="number" min="0" step="10000" value="0"></div>
+      <div><label class="f" for="f_asp">The amount that would make this a success (₹)</label>
+        <input id="f_asp" type="number" min="0" step="50000" value="2500000"></div>
+    </div>
+    <div class="q" style="margin-top:6px">
+      <div class="qt">Split 100 points between two things.</div>
+      <div class="qh">Never falling below your floor, against having a real shot at your aspiration.</div>
+      <div class="inline">
+        <input id="f_sec" type="range" min="0" max="100" step="5" value="55" style="flex:1; min-width:180px">
+        <span class="unit" id="f_sec_out" style="font-variant-numeric:tabular-nums"></span>
+      </div>
+    </div>
+    <div class="q">
+      <div class="qt">How much expected end wealth would you give up to raise your chance of hitting the aspiration by ten percentage points?</div>
+      <div class="qh">Zero is a perfectly reasonable answer.</div>
+      <div class="inline"><span class="unit">₹</span><input id="f_tradeoff" class="w-sm" type="number" min="0" step="5000" value="40000"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="btn" id="go">Build my plan</button>
+      <button class="btn ghost" id="dl-json">Download my responses</button>
+      <button class="btn ghost" id="demo">Fill with a sample respondent</button>
+      <button class="btn ghost" id="clear">Clear</button>
+    </div>
+    <p class="tiny" style="margin-top:12px">
+      Answers are kept in this browser only, and are restored if you come back. Download
+      the file and send it to whoever is compiling the group's data.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================== PLAN ============== -->
+<section id="p-plan" class="hide"></section>
+
+<!-- ================================================== GROUP ============= -->
+<section id="p-group" class="hide">
+  <h1>Peer group</h1>
+  <p class="lede">
+    Load the response files the group has collected and compare them side by side.
+    The pilot dataset from the report is loaded by default so the view is never empty.
+  </p>
+  <div class="card">
+    <div class="row">
+      <input type="file" id="f-import" accept=".json" multiple style="max-width:340px">
+      <button class="btn ghost" id="reset-group">Back to the pilot dataset</button>
+    </div>
+  </div>
+  <div id="group-out"></div>
+</section>
+
+<!-- ================================================== METHOD ============ -->
+<section id="p-method" class="hide"></section>
+
+<footer>
+  <div><b>Layered</b>, a teaching prototype built for MBA680, Behavioral Finance.</div>
+  <div style="margin-top:6px">
+    The risky portfolio is the 60-stock maximum-Sharpe portfolio from Problem Statement 1.
+    Nothing here is investment advice.
+  </div>
+</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ===================================================================
+   Constants carried over from Problem Statement 1. These are the only
+   market inputs in the portal; everything else comes from the survey.
+   =================================================================== */
+const RF = 0.0650;
+const PS1 = {
+  gmv:       {mu:0.1271, sigma:0.1403},
+  tangency:  {mu:0.2493, sigma:0.1797},
+  maxReturn: {mu:0.2514, sigma:0.1878}
+};
+const AVG_VOL = 0.3471, AVG_CORR = 0.2383, N_UNIVERSE = 60;
+const EQUITY_PRIOR = 0.12;
+const SCENARIOS = {
+  in_sample:{shrink:0.00, label:"PS1 as reported"},
+  base:     {shrink:0.75, label:"Base case"},
+  prudent:  {shrink:1.00, label:"Stress case"}
+};
+const ADVICE = "base";
+const FLOOR_INTERIM_YEARS = 1.0;
+const ASPIRATION_N = 8;
+
+// Frontier: vertex pinned at the reported minimum-variance point, D set so the
+// curve also passes exactly through the reported maximum-Sharpe portfolio.
+const FRONT_D = Math.pow(PS1.tangency.mu-PS1.gmv.mu,2) /
+                (Math.pow(PS1.tangency.sigma,2)-Math.pow(PS1.gmv.sigma,2));
+const frontierSigma = r => Math.sqrt(Math.max(
+  PS1.gmv.sigma**2 + (r-PS1.gmv.mu)**2/FRONT_D, 1e-12));
+
+const SLEEVE_COV = AVG_CORR*AVG_VOL*AVG_VOL;
+const SLEEVE_BETA = SLEEVE_COV/(PS1.tangency.sigma**2);
+const sleeveSigma = n => AVG_VOL*Math.sqrt(1/n + (1-1/n)*AVG_CORR);
+const sleeveMuRaw = () => RF + SLEEVE_BETA*(PS1.tangency.mu-RF);
+const sleeveCorr  = n => Math.min(SLEEVE_COV/(sleeveSigma(n)*PS1.tangency.sigma), 0.999);
+
+const shrinkMu = (mu,sc)=> (1-SCENARIOS[sc].shrink)*mu + SCENARIOS[sc].shrink*EQUITY_PRIOR;
+const engineFor = sc => { const mu = shrinkMu(PS1.tangency.mu, sc);
+  return {name:sc, mu, sigma:PS1.tangency.sigma, sharpe:(mu-RF)/PS1.tangency.sigma}; };
+
+/* ---------------- survey design ---------------- */
+const LADDER_DOWN = 0.10;
+const LADDER_UP = [0.10,0.15,0.20,0.25,0.30,0.40,0.50,0.65,0.80,1.00];
+const UTIL_GRID = [0.90,1.00,1.15,1.30,1.45], UTIL_LO = 0.85, UTIL_HI = 1.60;
+const VF_GAIN = [0.10,0.25,0.50], VF_LOSS = [0.10,0.25,0.50], VF_ANCHOR = 1.00;
+const MIXED_LOSS = 10000, PW_STAKE = 10000, PW_P = [0.10,0.90];
+
+/* The thirty personality statements. Two per facet, three facets per domain.
+   `r:1` marks a reverse-keyed item. This is a short form written for this
+   portal and aligned to the BFI-2 domain structure; for the submitted data,
+   administer the official BFI-2-S and enter the domain scores instead. */
+const BFI = [
+ {d:"E",f:"Sociability",      t:"I start conversations easily with people I do not know."},
+ {d:"A",f:"Compassion",       t:"I feel genuinely concerned when someone is having a hard time."},
+ {d:"C",f:"Organization",     t:"I like to keep my things in order."},
+ {d:"N",f:"Anxiety",          t:"I worry a lot about things that might go wrong."},
+ {d:"O",f:"Intellect",        t:"I enjoy thinking through complicated problems."},
+ {d:"E",f:"Sociability",      t:"I keep to myself at social gatherings.", r:1},
+ {d:"A",f:"Compassion",       t:"I find it hard to care about other people's problems.", r:1},
+ {d:"C",f:"Organization",     t:"I leave a mess and deal with it later.", r:1},
+ {d:"N",f:"Anxiety",          t:"I stay relaxed even when under real pressure.", r:1},
+ {d:"O",f:"Aesthetics",       t:"I am moved by art, music or good design."},
+ {d:"E",f:"Assertiveness",    t:"I speak up when I hold a strong opinion."},
+ {d:"A",f:"Respectfulness",   t:"I stay courteous with people even when I disagree with them."},
+ {d:"C",f:"Productiveness",   t:"I finish what I start."},
+ {d:"N",f:"Depression",       t:"I often feel discouraged."},
+ {d:"O",f:"Aesthetics",       t:"I have little interest in artistic things.", r:1},
+ {d:"E",f:"Assertiveness",    t:"I find it hard to take the lead in a group.", r:1},
+ {d:"A",f:"Respectfulness",   t:"I can be blunt to the point of rudeness.", r:1},
+ {d:"C",f:"Productiveness",   t:"I put off tasks I find difficult.", r:1},
+ {d:"N",f:"Depression",       t:"I rarely feel down about things.", r:1},
+ {d:"O",f:"Creativity",       t:"I come up with new ideas easily."},
+ {d:"E",f:"Energy",           t:"I have a lot of energy through the day."},
+ {d:"A",f:"Trust",            t:"I assume people mean well until shown otherwise."},
+ {d:"C",f:"Responsibility",   t:"People can count on me to do what I said I would."},
+ {d:"N",f:"Volatility",       t:"My mood changes quickly."},
+ {d:"O",f:"Creativity",       t:"I have trouble imagining things that do not exist.", r:1},
+ {d:"E",f:"Energy",           t:"I often feel low on energy.", r:1},
+ {d:"A",f:"Trust",            t:"I am suspicious of other people's motives.", r:1},
+ {d:"C",f:"Responsibility",   t:"I can be careless about commitments I have made.", r:1},
+ {d:"N",f:"Volatility",       t:"My emotions stay steady through the day.", r:1},
+ {d:"O",f:"Intellect",        t:"I avoid subjects that need a lot of thought.", r:1}
+];
+const DOM = {E:"Extraversion", A:"Agreeableness", C:"Conscientiousness",
+             N:"Negative Emotionality", O:"Open-Mindedness"};
+const NORM = {E:[3.24,0.77], A:[3.65,0.66], C:[3.43,0.74], N:[2.93,0.86], O:[3.68,0.68]};
+const DOM_COLOR = {E:"--s1", A:"--s3", C:"--s4", N:"--s8", O:"--s7"};
+
+/* ===================================================================
+   Numerics
+   =================================================================== */
+const erf = x => { // Abramowitz and Stegun 7.1.26
+  const s = x<0?-1:1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1 - ((((1.061405429*t -1.453152027)*t +1.421413741)*t
+            -0.284496736)*t +0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+};
+const normCdf = z => 0.5*(1+erf(z/Math.SQRT2));
+const normPdf = z => Math.exp(-0.5*z*z)/Math.sqrt(2*Math.PI);
+const normInv = p => { // Acklam
+  if(p<=0) return -Infinity; if(p>=1) return Infinity;
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,
+           1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,
+           6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,
+           -2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,
+           3.754408661907416e+00];
+  const pl=0.02425;
+  let q,r;
+  if(p<pl){ q=Math.sqrt(-2*Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+           ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p>1-pl){ q=Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+            ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  q=p-0.5; r=q*q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
+         (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+};
+const lognCdf = (x,m,s) => x<=0 ? 0 : normCdf((Math.log(x)-m)/s);
+const lognPdf = (x,m,s) => x<=0 ? 0 : normPdf((Math.log(x)-m)/s)/(x*s);
+
+const crraU = (w,g) => Math.abs(g-1)<1e-9 ? Math.log(w) : (Math.pow(w,1-g)-1)/(1-g);
+
+/** Golden-section minimisation of a unimodal f on [a,b]. */
+function minimise(f,a,b,tol=1e-7){
+  const gr=(Math.sqrt(5)-1)/2;
+  let c=b-gr*(b-a), d=a+gr*(b-a), fc=f(c), fd=f(d);
+  for(let i=0;i<200 && Math.abs(b-a)>tol;i++){
+    if(fc<fd){ b=d; d=c; fd=fc; c=b-gr*(b-a); fc=f(c); }
+    else     { a=c; c=d; fc=fd; d=a+gr*(b-a); fd=f(d); }
+  }
+  return (a+b)/2;
+}
+function bisect(f,a,b,tol=1e-9){
+  let fa=f(a);
+  if(fa*f(b)>0) return NaN;
+  for(let i=0;i<200;i++){
+    const m=(a+b)/2, fm=f(m);
+    if(Math.abs(b-a)<tol) return m;
+    if(fa*fm<=0){ b=m; } else { a=m; fa=fm; }
+  }
+  return (a+b)/2;
+}
+
+/* ===================================================================
+   Estimation. Mirrors engine/robo_engine.py line for line.
+   =================================================================== */
+function fitCRRA(grid, probs, lo, hi){
+  const sse = g => {
+    const ul=crraU(lo,g), uh=crraU(hi,g);
+    let s=0;
+    for(let i=0;i<grid.length;i++){
+      const p=(crraU(grid[i],g)-ul)/(uh-ul);
+      s += (p-probs[i])**2;
+    }
+    return s;
+  };
+  const g = minimise(sse,-0.5,24);
+  const rmse = Math.sqrt(sse(g)/grid.length);
+  const mean = probs.reduce((a,b)=>a+b,0)/probs.length;
+  const sst = probs.reduce((a,b)=>a+(b-mean)**2,0);
+  return {gamma:g, rmse, r2: sst>0 ? 1-sse(g)/sst : NaN};
+}
+
+function ladderInterval(row){
+  const at = up => bisect(g => 0.5*crraU(1+up,g)+0.5*crraU(1-LADDER_DOWN,g)-crraU(1,g), -0.4, 40);
+  if(!row || row>LADDER_UP.length) return [at(LADDER_UP[LADDER_UP.length-1]), Infinity];
+  return [row>=2 ? at(LADDER_UP[row-2]) : 0, at(LADDER_UP[row-1])];
+}
+
+function fitDiscounting(x1, x13, base=10000){
+  const delta = base/x13;
+  const beta  = base/(delta*x1);
+  return {beta, delta, deltaAnnual:Math.pow(delta,12),
+          annualRate: Math.pow(delta,-12)-1};
+}
+
+function slopeThroughOrigin(xs, ps){
+  let num=0, den=0;
+  for(let i=0;i<xs.length;i++){ const lx=Math.log(xs[i]); num+=lx*Math.log(ps[i]); den+=lx*lx; }
+  const s = num/den;
+  let e=0; for(let i=0;i<xs.length;i++) e += (Math.exp(s*Math.log(xs[i]))-ps[i])**2;
+  return {slope:s, rmse:Math.sqrt(e/xs.length)};
+}
+
+function fitValue(gx,gp,lx,lp,mixedLoss,mixedGain){
+  const a = slopeThroughOrigin(gx.map(v=>v/VF_ANCHOR), gp);
+  const b = slopeThroughOrigin(lx.map(v=>v/VF_ANCHOR), lp);
+  const abar = 0.5*(a.slope+b.slope);
+  return {alpha:a.slope, beta:b.slope, abar,
+          lambda: Math.pow(mixedGain/mixedLoss, abar),
+          lambdaLinear: mixedGain/mixedLoss,
+          alphaRmse:a.rmse, betaRmse:b.rmse};
+}
+
+const ktWeight = (p,g) => Math.pow(p,g) /
+  Math.pow(Math.pow(p,g)+Math.pow(1-p,g), 1/g);
+
+function fitWeighting(ps, ces, stake, alpha){
+  const obs = ces.map(c => Math.pow(c/stake, alpha));
+  const sse = g => ps.reduce((s,p,i)=> s+(ktWeight(p,g)-obs[i])**2, 0);
+  const g = minimise(sse, 0.28, 1.0);
+  const cross = bisect(p => ktWeight(p,g)-p, 0.01, 0.99);
+  return {gammaW:g, rmse:Math.sqrt(sse(g)/ps.length), observed:obs,
+          fitted: ps.map(p=>ktWeight(p,g)), crossover:cross};
+}
+
+function scoreBFI(answers){
+  const sums={E:[],A:[],C:[],N:[],O:[]};
+  BFI.forEach((it,i)=>{
+    const v = answers[i];
+    sums[it.d].push(it.r ? 6-v : v);
+  });
+  const out={};
+  for(const d in sums){
+    const m = sums[d].reduce((a,b)=>a+b,0)/sums[d].length;
+    const z = (m-NORM[d][0])/NORM[d][1];
+    out[d]={label:DOM[d], mean:m, z, pct:normCdf(z)*100, items:sums[d]};
+  }
+  return out;
+}
+
+function spaParams(val, wgt, secPoints, tradeoff, corpus){
+  return {
+    qs: Math.max(val.lambda-1, 0),
+    qp: Math.max(1/wgt.gammaW-1, 0),
+    omega: secPoints/100,
+    betaAsp: (tradeoff/0.10)/corpus
+  };
+}
+
+const termDist = (mu,sig,yrs) => [ (mu-0.5*sig*sig)*yrs, Math.max(sig*Math.sqrt(yrs),1e-9) ];
+const probBelow = (mult,mu,sig,yrs) => {
+  if(mult<=0) return 0;
+  const [m,s]=termDist(mu,sig,yrs);
+  return normCdf((Math.log(mult)-m)/s);
+};
+
+/** SP/A objective. h distorts the decumulative; the Choquet integral of wealth
+    under it is the security-potential term, and the aspiration term adds the
+    value of clearing the target. */
+function spaValue(mu,sig,yrs,spa,aspMult,n=1400){
+  const [m,s]=termDist(mu,sig,yrs);
+  const hi = Math.exp(m+6*s);
+  const dx = hi/n;
+  let sp = 0;
+  for(let i=0;i<n;i++){
+    const w = (i+0.5)*dx;
+    const D = 1 - lognCdf(w,m,s);
+    const h = spa.omega*Math.pow(D,1+spa.qs) +
+              (1-spa.omega)*(1-Math.pow(1-D,1+spa.qp));
+    sp += h*dx;
+  }
+  const pAsp = 1 - lognCdf(aspMult,m,s);
+  return {sp, pAsp, objective: sp + spa.betaAsp*pAsp};
+}
+
+function eutPortfolio(gamma, eng, cap=1.0){
+  const yStar = (eng.mu-RF)/(gamma*eng.sigma*eng.sigma);
+  const y = Math.min(Math.max(yStar,0),cap);
+  const mu = RF + y*(eng.mu-RF), sigma = y*eng.sigma;
+  return {yStar, y, capped:yStar>cap, mu, sigma,
+          utility: mu-0.5*gamma*sigma*sigma};
+}
+
+function bptSingleAccount(spa, eng, yrs, aspMult, floorMult, alpha){
+  let best=null, feasible=false; const curve=[];
+  for(let i=0;i<=120;i++){
+    const y=i/120;
+    const mu=RF+y*(eng.mu-RF), sig=y*eng.sigma;
+    const pT=probBelow(floorMult,mu,sig,yrs);
+    const pI=probBelow(floorMult,mu,sig,FLOOR_INTERIM_YEARS);
+    const v=spaValue(mu,sig,yrs,spa,aspMult);
+    const ok = Math.max(pT,pI) <= alpha+1e-9;
+    feasible = feasible||ok;
+    const row={y,mu,sigma:sig,pT,pI,ok,...v};
+    curve.push(row);
+    if(ok && (!best || v.objective>best.objective)) best=row;
+  }
+  if(!best) best = curve.reduce((a,b)=> Math.max(b.pT,b.pI)<Math.max(a.pT,a.pI)?b:a);
+  return {best, feasible, curve};
+}
+
+function bptMentalAccounts(inp, eng, yrs, nSleeve=ASPIRATION_N){
+  const corpus=inp.corpus;
+  const l1 = Math.min(inp.floor/Math.pow(1+RF,yrs), corpus);
+  let need=0; for(let t=1;t<=yrs;t++) need += inp.income/Math.pow(1+RF,t);
+  const l2 = Math.min(need, Math.max(corpus-l1,0));
+  const l3 = Math.max(corpus-l1-l2, 0);
+
+  let y2=0;
+  for(let i=0;i<=100;i++){
+    const y=i/100;
+    if(probBelow(1.0, RF+y*(eng.mu-RF), y*eng.sigma, yrs) <= 0.10+1e-9) y2=y;
+  }
+  const mu2=RF+y2*(eng.mu-RF), sig2=y2*eng.sigma;
+  const sig3=sleeveSigma(nSleeve), mu3=shrinkMu(sleeveMuRaw(), eng.name);
+  const rho=sleeveCorr(nSleeve);
+
+  const w1=l1/corpus, w2=l2/corpus, w3=l3/corpus;
+  const muAgg = w1*RF + w2*mu2 + w3*mu3;
+  const sigAgg = Math.sqrt(Math.max((w2*sig2)**2 + (w3*sig3)**2 +
+                 2*rho*(w2*sig2)*(w3*sig3), 0));
+  const calMu = RF + eng.sharpe*sigAgg;
+  return {
+    layers:[
+      {name:"Security",   amount:l1, weight:w1, mu:RF,  sigma:0,    y:0,
+       vehicle:"Treasury bills or a bank fixed deposit",
+       goal:`Hold at least ${inr(inp.floor)} at year ${yrs}`},
+      {name:"Income",     amount:l2, weight:w2, mu:mu2, sigma:sig2, y:y2,
+       vehicle:`${pct(y2,0)} in the PS1 portfolio, the rest in T-bills`,
+       goal: inp.income>0 ? `Fund ${inr(inp.income)} a year for ${yrs} years` : "Not required"},
+      {name:"Aspiration", amount:l3, weight:w3, mu:mu3, sigma:sig3, y:1,
+       vehicle:`Equal-weighted ${nSleeve}-name cut of the same portfolio`,
+       goal:`Reach ${inr(inp.aspiration)}`}
+    ],
+    nSleeve, sleeveSigma:sig3, sleeveMu:mu3, rho,
+    agg:{mu:muAgg, sigma:sigAgg},
+    calMu, lossBps:(calMu-muAgg)*10000
+  };
+}
+
+/* ===================================================================
+   Advisory commentary
+   =================================================================== */
+const RULES = [
+ ["N","high",0.5,"Anxiety will be the binding constraint, not the risk budget",
+  "Fund the security layer first and show it as its own line before any talk of return. Report annually rather than monthly: at this volatility the chance of seeing a loss over a given month is about 44%, against roughly 12% over a year, and each printed loss is scaled by your loss aversion. Automate the contribution so the decision is not re-taken every month."],
+ ["N","low",-0.5,"Low reactivity permits a higher equity weight than the risk score alone suggests",
+  "The mean-variance allocation can be implemented close to its unconstrained value. The risk is the mirror image of anxiety: you are unlikely to be shaken out of a position, but equally unlikely to review it. Put a calendar rebalance in place rather than relying on attention."],
+ ["O","high",0.5,"Openness sustains the aspiration layer but invites thematic drift",
+  "Give the aspiration layer a real allocation. Suppressing it usually reappears as unsupervised trading outside the plan. Cap it in writing, and require that any new theme be funded by selling something inside the same layer, so curiosity is spent from a fixed budget."],
+ ["O","low",-0.5,"A small aspiration layer, explained in familiar terms",
+  "Keep the aspiration layer token or absent, and describe the core portfolio in terms of the companies inside it rather than the optimisation behind it. Novel structures will read as risk regardless of their statistics."],
+ ["C","low",-0.5,"The plan will fail on execution rather than on design",
+  "Reduce the number of decisions to as close to zero as possible: a standing instruction on the contribution date, automatic rebalancing at a fixed threshold, no discretionary top-ups. A slightly worse portfolio that is actually followed beats the optimal one that is not."],
+ ["C","high",0.5,"Execution is reliable, so the plan can carry more moving parts",
+  "Threshold rebalancing, tax-loss harvesting and a staged entry are all realistic. The failure mode to watch is over-monitoring: set an explicit review cadence so diligence does not turn into trading."],
+ ["E","high",0.5,"Social comparison is the likely source of unplanned changes",
+  "Expect pressure from conversations about individual stocks. Pre-commit the review dates, and measure against your own goal funding level rather than against an index or against what a friend reports, since neither comparison is adjusted for risk."],
+ ["A","high",0.5,"High trust raises advice-taking but also herding risk",
+  "Recommendations will be accepted with little pushback, which shifts the burden of challenge onto the adviser. The downside case should be stated explicitly and in rupees at every review."],
+ ["A","low",-0.5,"Expect the reasoning to be audited, so lead with it",
+  "The screen, the covariance inputs and the constraint set should come before the recommendation. Buy-in here comes from the method rather than from the relationship, and an unexplained allocation will simply be overridden."]
+];
+
+function commentary(bfi, val, disc, spa){
+  const out=[];
+  for(const [d,dir,thr,h,b] of RULES){
+    const z=bfi[d].z;
+    if((dir==="high"&&z>=thr)||(dir==="low"&&z<=thr))
+      out.push({domain:DOM[d], head:h, body:b});
+  }
+  if(val.lambda>=2.5) out.push({domain:"Loss aversion",
+    head:`Loss aversion of ${val.lambda.toFixed(2)} makes reporting frequency a portfolio decision`,
+    body:"At this lambda the portfolio's own volatility does less damage than the rate at which you look at it. The same holding reviewed monthly and reviewed annually produces different behaviour from the same person, so the review interval belongs in the policy statement next to the asset weights."});
+  if(disc.beta<=0.90) out.push({domain:"Present bias",
+    head:`Present bias of ${disc.beta.toFixed(2)} threatens the contribution, not the allocation`,
+    body:"The allocation can be right and the plan still fail, because the money never arrives. Use a commitment device: auto-debit on the salary date, and hold the security layer somewhere with a withdrawal penalty, so the cost of raiding it is felt at the moment of temptation."});
+  if(spa.qp>=0.7) out.push({domain:"Hope",
+    head:"Strong overweighting of small probabilities",
+    body:"You genuinely value lottery-like exposure, and prospect theory treats that as a preference rather than as an error. Meet it inside the aspiration layer, where it is sized and visible, instead of letting it leak into the core portfolio as position concentration."});
+  return out;
+}
+
+/* ===================================================================
+   Formatting
+   =================================================================== */
+const pct = (x,d=1) => (x*100).toFixed(d)+"%";
+function inr(x){
+  if(!isFinite(x)) return "n/a";
+  const n=Math.round(x);
+  if(n>=1e7) return "₹"+(n/1e7).toFixed(2).replace(/\.00$/,"")+" cr";
+  if(n>=1e5) return "₹"+(n/1e5).toFixed(2).replace(/\.00$/,"")+" L";
+  return "₹"+n.toLocaleString("en-IN");
+}
+const cssv = v => getComputedStyle(document.body).getPropertyValue(v).trim();
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const el = (t,a={},...kids)=>{ const n=document.createElement(t);
+  for(const k in a){ if(k==="class") n.className=a[k]; else if(k==="html") n.innerHTML=a[k];
+                     else n.setAttribute(k,a[k]); }
+  kids.flat().forEach(k=> n.append(k?.nodeType?k:document.createTextNode(k)));
+  return n; };
+
+let toastT;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("on");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2200);
+}
+
+/* ===================================================================
+   Charts. Plain inline SVG so the page stays a single file.
+   =================================================================== */
+function chart({w=440,h=250,pad=[14,12,34,44],xd,yd,xfmt,yfmt,xlabel,ylabel,
+                xticks=5,yticks=4,draw}){
+  const [pt,pr,pb,pl]=pad;
+  const iw=w-pl-pr, ih=h-pt-pb;
+  const X = v => pl + (v-xd[0])/(xd[1]-xd[0])*iw;
+  const Y = v => pt + ih - (v-yd[0])/(yd[1]-yd[0])*ih;
+  let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img">`;
+  for(let i=0;i<=yticks;i++){
+    const v=yd[0]+(yd[1]-yd[0])*i/yticks, y=Y(v);
+    s+=`<line class="gridline" x1="${pl}" y1="${y}" x2="${w-pr}" y2="${y}"/>`;
+    s+=`<text x="${pl-7}" y="${y+3.5}" font-size="10" text-anchor="end">${yfmt(v)}</text>`;
+  }
+  for(let i=0;i<=xticks;i++){
+    const v=xd[0]+(xd[1]-xd[0])*i/xticks, x=X(v);
+    s+=`<text x="${x}" y="${h-pb+15}" font-size="10" text-anchor="middle">${xfmt(v)}</text>`;
+  }
+  s+=`<line class="axis" x1="${pl}" y1="${pt+ih}" x2="${w-pr}" y2="${pt+ih}"/>`;
+  s+=draw({X,Y,iw,ih,pl,pt,pr,pb,w,h});
+  if(xlabel) s+=`<text x="${pl+iw/2}" y="${h-2}" font-size="10.5" text-anchor="middle">${xlabel}</text>`;
+  if(ylabel) s+=`<text transform="translate(11,${pt+ih/2}) rotate(-90)" font-size="10.5" text-anchor="middle">${ylabel}</text>`;
+  return s+`</svg>`;
+}
+const path = (pts,X,Y) => pts.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(2)+" "+Y(p[1]).toFixed(2)).join(" ");
+
+function chartUtility(gamma){
+  const pts=[]; for(let i=0;i<=120;i++){
+    const w=UTIL_LO+(UTIL_HI-UTIL_LO)*i/120;
+    pts.push([w,(crraU(w,gamma)-crraU(UTIL_LO,gamma))/(crraU(UTIL_HI,gamma)-crraU(UTIL_LO,gamma))]);
+  }
+  return chart({xd:[UTIL_LO,UTIL_HI], yd:[0,1],
+    xfmt:v=>v.toFixed(2)+"x", yfmt:v=>v.toFixed(1),
+    xlabel:"Terminal wealth, as a multiple of your corpus", ylabel:"Utility",
+    draw:({X,Y})=>`
+      <path d="${path([[UTIL_LO,0],[UTIL_HI,1]],X,Y)}" fill="none" stroke="${cssv('--ink-3')}" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <path d="${path(pts,X,Y)}" fill="none" stroke="${cssv('--s1')}" stroke-width="2" stroke-linecap="round"/>`});
+}
+
+function chartValue(val){
+  const f = x => x>=0 ? Math.pow(x,val.alpha) : -val.lambda*Math.pow(-x,val.beta);
+  const pts=[]; for(let i=-60;i<=60;i++) pts.push([i/60, f(i/60)]);
+  const lo=f(-1), hi=f(1);
+  return chart({yd:[lo*1.05,hi*1.6], xd:[-1,1],
+    xfmt:v=>(v*100).toFixed(0)+"%", yfmt:v=>v.toFixed(1), yticks:4,
+    xlabel:"Gain or loss, as a share of your corpus", ylabel:"Value",
+    draw:({X,Y,pl,w,pr,pt,ih})=>`
+      <line class="axis" x1="${pl}" y1="${Y(0)}" x2="${w-pr}" y2="${Y(0)}"/>
+      <line class="axis" x1="${X(0)}" y1="${pt}" x2="${X(0)}" y2="${pt+ih}"/>
+      <path d="${path(pts.filter(p=>p[0]<=0),X,Y)}" fill="none" stroke="${cssv('--s8')}" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="${path(pts.filter(p=>p[0]>=0),X,Y)}" fill="none" stroke="${cssv('--s3')}" stroke-width="2.2" stroke-linecap="round"/>
+      <text x="${X(0.52)}" y="${Y(hi*0.55)}" font-size="10.5" fill="${cssv('--s3')}">gains</text>
+      <text x="${X(-0.9)}" y="${Y(lo*0.62)}" font-size="10.5" fill="${cssv('--s8')}">losses, ${val.lambda.toFixed(2)}x steeper</text>`});
+}
+
+function chartWeighting(wgt){
+  const pts=[]; for(let i=1;i<200;i++) pts.push([i/200, ktWeight(i/200,wgt.gammaW)]);
+  return chart({xd:[0,1], yd:[0,1], xfmt:v=>v.toFixed(1), yfmt:v=>v.toFixed(1),
+    xlabel:"Stated probability", ylabel:"Decision weight",
+    draw:({X,Y})=>`
+      <path d="${path([[0,0],[1,1]],X,Y)}" fill="none" stroke="${cssv('--ink-3')}" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <path d="${path(pts,X,Y)}" fill="none" stroke="${cssv('--s7')}" stroke-width="2" stroke-linecap="round"/>
+      ${PW_P.map((p,i)=>`<circle cx="${X(p)}" cy="${Y(wgt.observed[i])}" r="4.2"
+         fill="${cssv('--s7')}" stroke="${cssv('--surface')}" stroke-width="1.6"/>`).join("")}
+      <text x="${X(0.06)}" y="${Y(0.42)}" font-size="10">long shots
+        <tspan x="${X(0.06)}" dy="12">overweighted</tspan></text>
+      <text x="${X(0.55)}" y="${Y(0.72)}" font-size="10">near-certainties
+        <tspan x="${X(0.55)}" dy="12">underweighted</tspan></text>`});
+}
+
+function chartFrontier(eut, ma, eng){
+  const fr=[]; for(let i=0;i<=80;i++){
+    const r=PS1.gmv.mu+(PS1.maxReturn.mu-PS1.gmv.mu)*i/80;
+    fr.push([frontierSigma(r), shrinkMu(r,eng.name)]);
+  }
+  const xmax=0.21, ymin=0.05, ymax=Math.max(0.175, eng.mu*1.12);
+  return chart({h:270, xd:[0,xmax], yd:[ymin,ymax],
+    xfmt:v=>(v*100).toFixed(0)+"%", yfmt:v=>(v*100).toFixed(0)+"%",
+    xlabel:"Annualised volatility", ylabel:"Expected return",
+    draw:({X,Y})=>`
+      <path d="${path(fr,X,Y)}" fill="none" stroke="${cssv('--ink-3')}" stroke-width="1.6"/>
+      <path d="${path([[0,RF],[xmax,RF+eng.sharpe*xmax]],X,Y)}" fill="none"
+            stroke="${cssv('--ink')}" stroke-width="1.6" stroke-dasharray="5 3"/>
+      <circle cx="${X(0)}" cy="${Y(RF)}" r="3.6" fill="${cssv('--ink')}"/>
+      <text x="${X(0.006)}" y="${Y(RF)-8}" font-size="10">risk free</text>
+      <line x1="${X(eut.sigma)}" y1="${Y(eut.mu)}" x2="${X(ma.agg.sigma)}" y2="${Y(ma.agg.mu)}"
+            stroke="${cssv('--ink-3')}" stroke-width="1"/>
+      <circle cx="${X(eut.sigma)}" cy="${Y(eut.mu)}" r="6"
+              fill="${cssv('--s1')}" stroke="${cssv('--surface')}" stroke-width="2"/>
+      <rect x="${X(ma.agg.sigma)-5.4}" y="${Y(ma.agg.mu)-5.4}" width="10.8" height="10.8" rx="2"
+              fill="${cssv('--s2')}" stroke="${cssv('--surface')}" stroke-width="2"/>
+      <text x="${X(eut.sigma)+10}" y="${Y(eut.mu)-6}" font-size="10.5" fill="${cssv('--s1')}" font-weight="600">EUT</text>
+      <text x="${X(ma.agg.sigma)+10}" y="${Y(ma.agg.mu)+13}" font-size="10.5" fill="${cssv('--s2')}" font-weight="600">BPT</text>`});
+}
+
+function chartWealth(eut, ma, yrs, floorM, aspM){
+  const series=[[eut,cssv("--s1"),"EUT"],[{mu:ma.agg.mu,sigma:ma.agg.sigma},cssv("--s2"),"BPT"]];
+  let xmax=0;
+  const curves = series.map(([p,c,lab])=>{
+    const [m,s]=termDist(p.mu,p.sigma,yrs);
+    xmax=Math.max(xmax, Math.exp(m+3*s));
+    return {c,lab,m,s};
+  });
+  xmax=Math.min(xmax, aspM*2.2);
+  let ymax=0;
+  curves.forEach(cv=>{ for(let i=1;i<=160;i++) ymax=Math.max(ymax, lognPdf(xmax*i/160,cv.m,cv.s)); });
+  return chart({h:230, xd:[0,xmax], yd:[0,ymax*1.12],
+    xfmt:v=>v.toFixed(1)+"x", yfmt:()=>"", yticks:3,
+    xlabel:"Terminal wealth, as a multiple of your corpus",
+    draw:({X,Y,pt,ih})=>{
+      let s="";
+      [[floorM,cssv("--s8"),"floor"],[aspM,cssv("--s6"),"aspiration"]].forEach(([v,c,lab])=>{
+        if(v<=xmax){
+          s+=`<line x1="${X(v)}" y1="${pt}" x2="${X(v)}" y2="${pt+ih}" stroke="${c}" stroke-width="1.3" stroke-dasharray="3 2"/>`;
+          s+=`<text x="${X(v)+4}" y="${pt+11}" font-size="10" fill="${c}">${lab}</text>`;
+        }
+      });
+      curves.forEach(cv=>{
+        const pts=[]; for(let i=0;i<=200;i++){ const x=xmax*i/200; pts.push([x, lognPdf(x,cv.m,cv.s)]); }
+        s+=`<path d="${path(pts,X,Y)}" fill="none" stroke="${cv.c}" stroke-width="2" stroke-linecap="round"/>`;
+      });
+      return s;
+    }});
+}
+
+/* ===================================================================
+   Survey rendering
+   =================================================================== */
+function buildLadder(){
+  const tb=document.getElementById("ladder");
+  LADDER_UP.forEach((up,i)=>{
+    const tr=el("tr",{},
+      el("td",{class:"muted"},String(i+1)),
+      el("td",{},"+"+(up*100).toFixed(0)+"% of your corpus"),
+      el("td",{class:"muted"},"−10%"),
+      el("td",{html:`<div class="pick">
+        <input type="radio" name="lad${i}" id="lad${i}a" value="a"><label for="lad${i}a">Accept</label>
+        <input type="radio" name="lad${i}" id="lad${i}r" value="r" checked><label for="lad${i}r">Refuse</label>
+      </div>`}));
+    tb.append(tr);
+  });
+  tb.addEventListener("change", ()=>{
+    // Choices on a ladder are monotone: accepting row i implies accepting every
+    // richer row below it. Enforcing that here stops inconsistent switch points.
+    const rows=[...tb.querySelectorAll("tr")];
+    let first=-1;
+    rows.forEach((tr,i)=>{ if(tr.querySelector(`#lad${i}a`).checked && first<0) first=i; });
+    rows.forEach((tr,i)=>{
+      if(first>=0 && i>first) tr.querySelector(`#lad${i}a`).checked=true;
+      tr.classList.toggle("on", first>=0 && i>=first);
+    });
+    save(); progress();
+  });
+}
+
+function buildBFI(){
+  const box=document.getElementById("bfi");
+  BFI.forEach((it,i)=>{
+    const opts=[1,2,3,4,5].map(v=>
+      `<input type="radio" name="b${i}" id="b${i}_${v}" value="${v}"${v===3?" checked":""}>
+       <label for="b${i}_${v}" title="${v}">${v}</label>`).join("");
+    box.append(el("div",{class:"lik"},
+      el("div",{class:"t"}, it.t),
+      el("div",{class:"opts", html:opts})));
+  });
+  box.append(el("p",{class:"tiny",style:"margin-top:12px"},
+    "1 disagree strongly · 2 disagree a little · 3 neutral · 4 agree a little · 5 agree strongly"));
+}
+
+function sliderQ(id, title, hint, value=50){
+  return el("div",{class:"q"},
+    el("div",{class:"qt"}, title),
+    el("div",{class:"qh"}, hint),
+    el("div",{class:"inline"},
+      el("input",{type:"range", id, min:"1", max:"99", step:"1", value:String(value),
+                  style:"flex:1; min-width:200px"}),
+      el("span",{class:"unit", id:id+"_out", style:"font-variant-numeric:tabular-nums; min-width:46px"})));
+}
+
+function buildUtil(){
+  const box=document.getElementById("util");
+  box.append(el("p",{class:"tiny",style:"margin:0 0 10px"},
+    `Worst outcome on the table: ${(UTIL_LO*100).toFixed(0)}% of your corpus. `+
+    `Best: ${(UTIL_HI*100).toFixed(0)}%.`));
+  UTIL_GRID.forEach((m,i)=>{
+    box.append(sliderQ(`u${i}`,
+      `Certain ${(m*100).toFixed(0)}% of your corpus, or the gamble.`,
+      `What chance of the best outcome makes the two equally attractive?`,
+      Math.round(100*(m-UTIL_LO)/(UTIL_HI-UTIL_LO))));
+  });
+}
+
+function buildVF(){
+  const box=document.getElementById("vf");
+  VF_GAIN.forEach((x,i)=>{
+    box.append(sliderQ(`g${i}`,
+      `A certain gain of ${(x*100).toFixed(0)}% of your corpus, or a gamble at gaining 100%.`,
+      `What chance of the 100% gain leaves you indifferent?`,
+      Math.round(x*100)));
+  });
+  VF_LOSS.forEach((x,i)=>{
+    box.append(sliderQ(`l${i}`,
+      `A certain loss of ${(x*100).toFixed(0)}% of your corpus, or a gamble at losing 100%.`,
+      `What chance of the 100% loss leaves you indifferent?`,
+      Math.round(x*100)));
+  });
+}
+
+function buildPW(){
+  const box=document.getElementById("pw");
+  PW_P.forEach((p,i)=>{
+    box.append(el("div",{class:"q"},
+      el("div",{class:"qt"}, `A ${(p*100).toFixed(0)}% chance of winning ₹10,000, otherwise nothing.`),
+      el("div",{class:"qh"}, "What certain amount would you accept instead?"),
+      el("div",{class:"inline"},
+        el("span",{class:"unit"},"₹"),
+        el("input",{id:"pw"+i, class:"w-sm", type:"number", min:"0", max:"10000", step:"50",
+                    value:String(p===0.10?1500:7000)}))));
+  });
+}
+
+/* ---------------- read and persist ---------------- */
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value);
+
+/** Reject a form that cannot produce a plan, rather than returning NaN into the maths. */
+function validate(d){
+  const bad=[];
+  if(!(d.corpus>0)) bad.push("the amount you are investing");
+  if(!(d.horizon>=1)) bad.push("the horizon");
+  if(!(d.floorAlpha>0)) bad.push("your floor tolerance");
+  if(!(d.td13>0)||!(d.td1>0)) bad.push("the time-preference answers");
+  if(!(d.mixedGain>0)) bad.push("the coin-flip question");
+  if(d.pwCe.some(c=>!(c>0)&&c!==0)) bad.push("the certainty equivalents");
+  if([...d.utilP,...d.gainP,...d.lossP].some(p=>!(p>0&&p<1))) bad.push("the slider questions");
+  if(d.floor>0 && d.floor>d.corpus*Math.pow(1+RF,d.horizon))
+    bad.push(`a floor of ${inr(d.floor)}, which not even Treasury bills can reach from ${inr(d.corpus)} in ${d.horizon} years`);
+  if(bad.length) throw new Error("check "+bad.join(", "));
+  return d;
+}
+
+function readForm(){
+  const rows=[...document.querySelectorAll("#ladder tr")];
+  let ladder=11;
+  rows.forEach((tr,i)=>{ if(tr.querySelector(`#lad${i}a`).checked && ladder===11) ladder=i+1; });
+  const bfi=BFI.map((_,i)=> parseInt(document.querySelector(`input[name=b${i}]:checked`).value,10));
+  return {
+    id:$("f_id").value.trim(), name:$("f_name").value.trim(),
+    age:num("f_age"), corpus:num("f_corpus"), horizon:Math.round(num("f_horizon")),
+    goal:$("f_goal").value,
+    ladderRow:ladder,
+    td1:num("f_td1"), td13:num("f_td13"),
+    bfi,
+    utilP:UTIL_GRID.map((_,i)=>num("u"+i)/100),
+    gainP:VF_GAIN.map((_,i)=>num("g"+i)/100),
+    lossP:VF_LOSS.map((_,i)=>num("l"+i)/100),
+    mixedGain:num("f_mixed"),
+    pwCe:PW_P.map((_,i)=>num("pw"+i)),
+    floor:num("f_floor"), floorAlpha:parseFloat($("f_alpha").value),
+    income:num("f_income"), aspiration:num("f_asp"),
+    secPoints:num("f_sec"), tradeoff:num("f_tradeoff")
+  };
+}
+
+function writeForm(d){
+  const set=(id,v)=>{ if($(id)!=null && v!=null) $(id).value=v; };
+  set("f_id",d.id); set("f_name",d.name); set("f_age",d.age); set("f_corpus",d.corpus);
+  set("f_horizon",d.horizon); set("f_goal",d.goal);
+  set("f_td1",d.td1); set("f_td13",d.td13); set("f_mixed",d.mixedGain);
+  set("f_floor",d.floor); set("f_income",d.income); set("f_asp",d.aspiration);
+  set("f_sec",d.secPoints); set("f_tradeoff",d.tradeoff);
+  // Match the option numerically. Assigning "0.1" to a select whose option is
+  // "0.10" matches nothing and leaves the value empty, which reads back as NaN
+  // and quietly makes every allocation look infeasible.
+  if(d.floorAlpha!=null){
+    const sel=$("f_alpha");
+    const opt=[...sel.options].find(o=>Math.abs(parseFloat(o.value)-d.floorAlpha)<1e-9);
+    if(opt) sel.value=opt.value;
+  }
+  (d.bfi||[]).forEach((v,i)=>{ const n=$(`b${i}_${v}`); if(n) n.checked=true; });
+  (d.utilP||[]).forEach((v,i)=> set("u"+i, Math.round(v*100)));
+  (d.gainP||[]).forEach((v,i)=> set("g"+i, Math.round(v*100)));
+  (d.lossP||[]).forEach((v,i)=> set("l"+i, Math.round(v*100)));
+  (d.pwCe||[]).forEach((v,i)=> set("pw"+i, v));
+  if(d.ladderRow){
+    [...document.querySelectorAll("#ladder tr")].forEach((tr,i)=>{
+      tr.querySelector(`#lad${i}${i+1>=d.ladderRow?"a":"r"}`).checked=true;
+      tr.classList.toggle("on", i+1>=d.ladderRow);
+    });
+  }
+  syncOutputs();
+}
+
+const KEY="mba680.layered.v1";
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(readForm())); }catch(e){} }
+function load(){ try{ const s=localStorage.getItem(KEY); if(s) writeForm(JSON.parse(s)); }catch(e){} }
+
+function syncOutputs(){
+  const s=$("f_sec");
+  if(s) $("f_sec_out").textContent = `${s.value} security / ${100-s.value} potential`;
+  document.querySelectorAll('input[type=range]').forEach(r=>{
+    const o=$(r.id+"_out"); if(o && r.id!=="f_sec") o.textContent = r.value+"%";
+  });
+}
+
+function progress(){
+  const fields=[...document.querySelectorAll("#p-survey input, #p-survey select")];
+  const touched=fields.filter(f=>f.type==="radio" ? f.checked : f.value!=="").length;
+  $("prog").style.width = Math.min(100, 100*touched/fields.length)+"%";
+}
+
+/* ===================================================================
+   The plan
+   =================================================================== */
+function analyse(inp){
+  validate(inp);
+  const ra  = fitCRRA(UTIL_GRID, inp.utilP, UTIL_LO, UTIL_HI);
+  const iv  = ladderInterval(inp.ladderRow);
+  const dis = fitDiscounting(inp.td1, inp.td13);
+  const val = fitValue(VF_GAIN, inp.gainP, VF_LOSS, inp.lossP, MIXED_LOSS, inp.mixedGain);
+  const wgt = fitWeighting(PW_P, inp.pwCe, PW_STAKE, val.alpha);
+  const bfi = scoreBFI(inp.bfi);
+  const spa = spaParams(val, wgt, inp.secPoints, inp.tradeoff, inp.corpus);
+
+  const floorM = inp.floor/inp.corpus, aspM = inp.aspiration/inp.corpus;
+  const scen={};
+  for(const sc in SCENARIOS){
+    const eng=engineFor(sc);
+    const eut=eutPortfolio(ra.gamma, eng);
+    const sa =bptSingleAccount(spa, eng, inp.horizon, aspM, floorM, inp.floorAlpha);
+    const ma =bptMentalAccounts(inp, eng, inp.horizon);
+    const conc=[20,12,8,5,3,2,1].map(n=>{
+      const m=bptMentalAccounts(inp, eng, inp.horizon, n);
+      return {n, sigma:m.sleeveSigma, lossBps:m.lossBps};
+    });
+    [eut, sa.best, ma.agg].forEach(p=>{
+      p.pFloor  = probBelow(floorM, p.mu, p.sigma, inp.horizon);
+      p.pFloor1y= probBelow(floorM, p.mu, p.sigma, FLOOR_INTERIM_YEARS);
+      p.pAsp    = 1-probBelow(aspM, p.mu, p.sigma, inp.horizon);
+      const [m,s]=termDist(p.mu,p.sigma,inp.horizon);
+      p.median = inp.corpus*Math.exp(m);
+      p.p05    = inp.corpus*Math.exp(m+s*normInv(0.05));
+      p.p95    = inp.corpus*Math.exp(m+s*normInv(0.95));
+    });
+    scen[sc]={eng,eut,sa,ma,conc};
+  }
+  return {inp, ra, iv, dis, val, wgt, bfi, spa, floorM, aspM, scen,
+          advice:commentary(bfi,val,dis,spa)};
+}
+
+function renderPlan(A){
+  const s=A.scen[ADVICE], eut=s.eut, sa=s.sa.best, ma=s.ma, inp=A.inp;
+  const who = inp.name || inp.id || "this respondent";
+  const P=$("p-plan");
+  P.innerHTML="";
+
+  P.append(el("h1",{},`A plan for ${who}`));
+  P.append(el("p",{class:"lede"},
+    `Built on ${inr(inp.corpus)} over ${inp.horizon} years, on the base-case inputs: the `+
+    `Problem Statement 1 portfolio with its expected return shrunk three quarters of the `+
+    `way to a long-run equity prior, which puts it at ${pct(s.eng.mu)} against `+
+    `${pct(PS1.tangency.sigma)} volatility.`));
+
+  /* ---- headline tiles ---- */
+  P.append(el("div",{class:"tiles",html:`
+    <div class="tile"><div class="k">Risk aversion</div><div class="v">${A.ra.gamma.toFixed(2)}</div>
+      <div class="s">ladder brackets it at ${A.iv[0].toFixed(1)} to ${isFinite(A.iv[1])?A.iv[1].toFixed(1):"∞"}</div></div>
+    <div class="tile"><div class="k">Loss aversion</div><div class="v">${A.val.lambda.toFixed(2)}</div>
+      <div class="s">a rupee lost feels ${A.val.lambda.toFixed(2)} times a rupee gained</div></div>
+    <div class="tile"><div class="k">EUT says hold</div><div class="v">${pct(eut.y,0)}</div>
+      <div class="s">in the risky portfolio</div></div>
+    <div class="tile"><div class="k">BPT says hold</div><div class="v">${pct(sa.y,0)}</div>
+      <div class="s">once your floor is enforced</div></div>`}));
+
+  /* ---- the disagreement ---- */
+  const gap = Math.abs(eut.y-sa.y);
+  P.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Where the two theories part company</h2>
+    <p>${gap<0.03
+      ? "They agree here. Your floor is loose enough relative to your horizon that it never binds, so the behavioral model and the mean-variance model land in the same place."
+      : `Expected utility theory sets your equity weight from one number, your risk aversion of
+         ${A.ra.gamma.toFixed(2)}, and arrives at ${pct(eut.y,0)}. Behavioral portfolio theory asks a
+         second question that mean-variance never asks: what is the chance you dip below
+         ${inr(inp.floor)}, and can you live with it? Enforcing that floor at the one-year mark,
+         not only at the finish, moves you to ${pct(sa.y,0)}. The
+         ${gap>0.001?pct(gap,0):"difference"} is the price of the floor.`}</p></div>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Portfolio</th><th class="n">Equity</th><th class="n">Return</th>
+      <th class="n">Volatility</th><th class="n">Median end value</th>
+      <th class="n">5th percentile</th><th class="n">Chance of the floor breaking</th>
+      <th class="n">Chance of the aspiration</th></tr></thead>
+      <tbody>
+        ${[["EUT complete portfolio","--s1",eut,pct(eut.y,0)],
+           ["BPT single account","--s2",sa,pct(sa.y,0)],
+           ["BPT layered","--s4",ma.agg,pct(1-ma.layers[0].weight,0)]].map(([n,c,p,y])=>`
+          <tr><td><span class="swatch" style="background:${cssv(c)}"></span>${n}</td>
+          <td class="n">${y}</td><td class="n">${pct(p.mu)}</td><td class="n">${pct(p.sigma)}</td>
+          <td class="n">${inr(p.median)}</td><td class="n">${inr(p.p05)}</td>
+          <td class="n">${pct(p.pFloor1y)}</td><td class="n">${pct(p.pAsp)}</td></tr>`).join("")}
+      </tbody></table></div>
+    <p class="tiny" style="margin-top:10px">The floor column is measured at one year, which is
+      where it binds. Your stated tolerance was ${pct(inp.floorAlpha,0)}.</p>`}));
+
+  /* ---- layers ---- */
+  const cols=["--s3","--s1","--s4"];
+  P.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Your layered portfolio</h2>
+    <p>Three mental accounts, each with its own goal and its own risk tolerance, built
+    without ever consulting the covariance between them. That omission is the whole
+    reason the result sits inside the frontier.</p></div>
+    <div class="stack">${ma.layers.map((L,i)=> L.weight<=0.001 ? "" :
+      `<div style="flex:${L.weight}; background:${cssv(cols[i])}">${L.weight>0.10?pct(L.weight,0):""}</div>`).join("")}</div>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Layer</th><th>What it is for</th><th>How it is held</th>
+      <th class="n">Amount</th><th class="n">Share</th></tr></thead>
+      <tbody>${ma.layers.map((L,i)=>`
+        <tr><td><span class="swatch" style="background:${cssv(cols[i])}"></span><b>${L.name}</b></td>
+        <td class="muted">${esc(L.goal)}</td><td class="muted">${esc(L.vehicle)}</td>
+        <td class="n">${inr(L.amount)}</td><td class="n">${pct(L.weight,0)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="note">
+      Together these come to ${pct(ma.agg.mu)} at ${pct(ma.agg.sigma)} volatility. The capital
+      allocation line would have paid ${pct(ma.calMu)} for exactly that much risk, so the layering
+      costs <b>${Math.round(ma.lossBps)} basis points a year</b>, or about
+      ${inr(inp.corpus*ma.lossBps/10000)} on this corpus. That is not a mistake to be corrected.
+      It is what you are paying for a portfolio you will actually keep, and it is worth paying
+      only if the alternative is abandoning the plan in a bad quarter.
+    </div>`}));
+
+  /* ---- charts ---- */
+  P.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Your fitted functions</h2>
+    <p>None of these curves is assumed. Each one is estimated from your own answers.</p></div>
+    <div class="charts2">
+      <div><div class="chartwrap">${chartUtility(A.ra.gamma)}</div>
+        <div class="cap">Utility over terminal wealth. Relative risk aversion
+          ${A.ra.gamma.toFixed(2)}, fit R² ${A.ra.r2.toFixed(3)}. The dashed line is
+          where a risk-neutral person would sit.</div></div>
+      <div><div class="chartwrap">${chartValue(A.val)}</div>
+        <div class="cap">Value over gains and losses. Curvature ${A.val.alpha.toFixed(2)} on gains
+          and ${A.val.beta.toFixed(2)} on losses, loss aversion ${A.val.lambda.toFixed(2)}.</div></div>
+      <div><div class="chartwrap">${chartWeighting(A.wgt)}</div>
+        <div class="cap">Probability weighting, γ = ${A.wgt.gammaW.toFixed(2)}. The dots are your two
+          answers. Your curve crosses the diagonal at
+          ${isFinite(A.wgt.crossover)?pct(A.wgt.crossover,0):"n/a"}.</div></div>
+      <div><div class="chartwrap">${chartFrontier(eut, ma, s.eng)}</div>
+        <div class="cap">Both of your portfolios against the frontier and the capital allocation
+          line, on base-case inputs.</div></div>
+    </div>`}));
+
+  P.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Where you are likely to end up</h2>
+    <p>Terminal wealth after ${inp.horizon} years, as a multiple of what you start with.</p></div>
+    <div class="chartwrap">${chartWealth(eut, ma, inp.horizon, A.floorM, A.aspM)}</div>
+    <div class="legend">
+      <span><i style="background:${cssv('--s1')}"></i>EUT portfolio</span>
+      <span><i style="background:${cssv('--s2')}"></i>BPT layered portfolio</span>
+    </div>
+    <div class="cap">The layered portfolio has the thinner left tail and the shorter right one.
+      That trade is the point of it, not a side effect.</div>`}));
+
+  /* ---- personality ---- */
+  const doms=["E","A","C","N","O"];
+  P.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Personality, and what it changes</h2>
+    <p>Scored against the BFI-2 norming sample. Personality does not enter the optimisation;
+    it changes how the result should be built, reported and defended.</p></div>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Domain</th><th class="n">Score</th><th class="n">Percentile</th><th>Relative to the norm</th></tr></thead>
+      <tbody>${doms.map(d=>{
+        const b=A.bfi[d], w=Math.max(2,Math.min(100,b.pct));
+        return `<tr><td><span class="swatch" style="background:${cssv(DOM_COLOR[d])}"></span>${DOM[d]}</td>
+        <td class="n">${b.mean.toFixed(2)}</td><td class="n">${Math.round(b.pct)}</td>
+        <td style="width:40%"><div style="background:var(--line); height:7px; border-radius:4px; position:relative">
+          <div style="width:${w}%; height:100%; border-radius:4px; background:${cssv(DOM_COLOR[d])}"></div>
+          <div style="position:absolute; left:50%; top:-3px; width:1px; height:13px; background:var(--ink-3)"></div>
+        </div></td></tr>`;}).join("")}</tbody></table></div>
+    <p class="tiny" style="margin-top:8px">The tick marks the norming-sample median.</p>`}));
+
+  const advBox = el("div",{class:"card"});
+  advBox.append(el("div",{class:"hd",html:`<h2>What your adviser should do differently</h2>
+    <p>Each of these is triggered by one of your scores, and each names a change to the process
+    rather than to the weights.</p>`}));
+  A.advice.forEach(a=> advBox.append(el("div",{class:"adv",html:
+    `<div class="d">${esc(a.domain)}</div><div class="h">${esc(a.head)}</div><div class="b">${esc(a.body)}</div>`})));
+  if(!A.advice.length) advBox.append(el("p",{class:"muted"},
+    "Every domain sits within half a standard deviation of the norm, and no preference parameter is extreme. A standard process is appropriate."));
+  P.append(advBox);
+
+  /* ---- sensitivity ---- */
+  P.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>How much of this survives a change of assumption</h2>
+    <p>The expected return of the risky portfolio is the weakest number in the whole exercise.
+    Here is your allocation under all three input sets.</p></div>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Input set</th><th class="n">Portfolio return</th><th class="n">Sharpe</th>
+      <th class="n">EUT equity</th><th class="n">BPT equity</th><th class="n">Layering cost</th></tr></thead>
+      <tbody>${Object.keys(SCENARIOS).map(sc=>{
+        const x=A.scen[sc];
+        return `<tr${sc===ADVICE?' style="font-weight:560"':''}>
+          <td>${SCENARIOS[sc].label}${sc===ADVICE?' <span class="pill ok">advised</span>':''}</td>
+          <td class="n">${pct(x.eng.mu)}</td><td class="n">${x.eng.sharpe.toFixed(2)}</td>
+          <td class="n">${pct(x.eut.y,0)}</td><td class="n">${pct(x.sa.best.y,0)}</td>
+          <td class="n">${Math.round(x.ma.lossBps)} bp</td></tr>`;}).join("")}</tbody></table></div>
+    <h3>And if the aspiration layer gets concentrated</h3>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Names in the layer</th>${s.conc.map(c=>`<th class="n">${c.n}</th>`).join("")}</tr></thead>
+      <tbody>
+        <tr><td>Its volatility</td>${s.conc.map(c=>`<td class="n">${pct(c.sigma,0)}</td>`).join("")}</tr>
+        <tr><td>Cost per year</td>${s.conc.map(c=>`<td class="n">${Math.round(c.lossBps)} bp</td>`).join("")}</tr>
+      </tbody></table></div>
+    <div class="note">Concentration buys nothing. A sleeve of the same names has the same beta
+      however few of them you hold, so narrowing it adds volatility that earns no return. The
+      aspiration layer is worth having; filling it with two stocks is not.</div>`}));
+
+  P.append(el("div",{class:"card"},
+    el("div",{class:"row"},
+      el("button",{class:"btn ghost", id:"dl-plan"},"Download this plan as JSON"),
+      el("button",{class:"btn ghost", id:"print"},"Print or save as PDF"))));
+  $("dl-plan").onclick=()=>download(`plan_${inp.id||"respondent"}.json`,
+    JSON.stringify({input:inp, fitted:{ra:A.ra,dis:A.dis,val:A.val,wgt:A.wgt,spa:A.spa},
+                    bfi:A.bfi, scenarios:A.scen, advice:A.advice},null,1));
+  $("print").onclick=()=>window.print();
+}
+
+/* ===================================================================
+   Peer group
+   =================================================================== */
+let GROUP=[];
+function renderGroup(){
+  const out=$("group-out");
+  out.innerHTML="";
+  if(!GROUP.length){ out.append(el("p",{class:"muted"},"No responses loaded.")); return; }
+  const A = GROUP.map(g=>analyse(g));
+
+  out.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Estimated preferences</h2>
+    <p>${A.length} respondent${A.length>1?"s":""}. Every column is fitted from the survey, not assumed.</p></div>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Who</th><th class="n">γ</th><th class="n">α</th><th class="n">β</th>
+        <th class="n">λ</th><th class="n">γ<tspan>w</tspan></th><th class="n">Present bias</th>
+        <th class="n">Discount rate</th><th class="n">N pct</th><th class="n">O pct</th></tr></thead>
+      <tbody>${A.map((a,i)=>`<tr>
+        <td><span class="swatch" style="background:${cssv('--s'+(i%8+1))}"></span>${esc(a.inp.name||a.inp.id||("R"+(i+1)))}</td>
+        <td class="n">${a.ra.gamma.toFixed(2)}</td><td class="n">${a.val.alpha.toFixed(2)}</td>
+        <td class="n">${a.val.beta.toFixed(2)}</td><td class="n">${a.val.lambda.toFixed(2)}</td>
+        <td class="n">${a.wgt.gammaW.toFixed(2)}</td><td class="n">${a.dis.beta.toFixed(2)}</td>
+        <td class="n">${pct(a.dis.annualRate,0)}</td>
+        <td class="n">${Math.round(a.bfi.N.pct)}</td><td class="n">${Math.round(a.bfi.O.pct)}</td>
+      </tr>`).join("")}</tbody></table></div>`}));
+
+  out.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Recommended portfolios</h2>
+    <p>Base-case inputs throughout.</p></div>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Who</th><th class="n">Corpus</th><th class="n">Horizon</th>
+        <th class="n">EUT equity</th><th class="n">BPT equity</th><th class="n">Security layer</th>
+        <th class="n">Aspiration layer</th><th class="n">Layering cost</th>
+        <th class="n">Chance of the aspiration</th></tr></thead>
+      <tbody>${A.map((a,i)=>{ const s=a.scen[ADVICE];
+        return `<tr>
+        <td><span class="swatch" style="background:${cssv('--s'+(i%8+1))}"></span>${esc(a.inp.name||a.inp.id||("R"+(i+1)))}</td>
+        <td class="n">${inr(a.inp.corpus)}</td><td class="n">${a.inp.horizon}y</td>
+        <td class="n">${pct(s.eut.y,0)}</td><td class="n">${pct(s.sa.best.y,0)}</td>
+        <td class="n">${pct(s.ma.layers[0].weight,0)}</td>
+        <td class="n">${pct(s.ma.layers[2].weight,0)}</td>
+        <td class="n">${Math.round(s.ma.lossBps)} bp</td>
+        <td class="n">${pct(s.eut.pAsp,0)}</td></tr>`;}).join("")}</tbody></table></div>`}));
+
+  // Scatter: risk aversion against the advised equity weight
+  const xs=A.map(a=>a.ra.gamma), ys=A.map(a=>a.scen[ADVICE].eut.y), y2=A.map(a=>a.scen[ADVICE].sa.best.y);
+  const xmax=Math.max(9,Math.ceil(Math.max(...xs)));
+  out.append(el("div",{class:"card",html:`
+    <div class="hd"><h2>Risk aversion against the advice</h2>
+    <p>Mean-variance theory makes the equity weight a strict function of risk aversion, so the
+    circles trace one curve exactly. The squares do not, because the floor enters where risk
+    aversion alone cannot reach.</p></div>
+    <div class="chartwrap">${chart({h:250, xd:[0,xmax], yd:[0,1.05],
+      xfmt:v=>v.toFixed(0), yfmt:v=>(v*100).toFixed(0)+"%",
+      xlabel:"Relative risk aversion", ylabel:"Share in the risky portfolio",
+      draw:({X,Y})=>{
+        const eng=engineFor(ADVICE); const pts=[];
+        for(let g=0.4; g<=xmax; g+=0.05)
+          pts.push([g, Math.min((eng.mu-RF)/(g*eng.sigma*eng.sigma),1)]);
+        let s=`<path d="${path(pts,X,Y)}" fill="none" stroke="${cssv('--ink-3')}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
+        A.forEach((a,i)=>{ const c=cssv('--s'+(i%8+1));
+          s+=`<line x1="${X(xs[i])}" y1="${Y(ys[i])}" x2="${X(xs[i])}" y2="${Y(y2[i])}" stroke="${c}" stroke-width="1" opacity=".5"/>`;
+          s+=`<circle cx="${X(xs[i])}" cy="${Y(ys[i])}" r="5.5" fill="${c}" stroke="${cssv('--surface')}" stroke-width="1.8"/>`;
+          s+=`<rect x="${X(xs[i])-5}" y="${Y(y2[i])-5}" width="10" height="10" rx="2" fill="${c}" stroke="${cssv('--surface')}" stroke-width="1.8"/>`;
+        });
+        return s;
+      }})}</div>
+    <div class="legend"><span>Circles are the mean-variance weight, squares the behavioral one.
+      The dashed curve is y* = (E(r) − rf) / (A σ²), capped at 100%.</span></div>`}));
+}
+
+/* ===================================================================
+   Method tab
+   =================================================================== */
+function renderMethod(){
+  const eng=engineFor(ADVICE);
+  $("p-method").innerHTML=`
+  <h1>Method</h1>
+  <p class="lede">Every number this portal produces comes from one of the steps below. They are
+  laid out so that a reader can disagree with a specific choice rather than with the output
+  as a whole.</p>
+
+  <div class="card"><div class="hd"><span class="num">01</span><h2>Utility, from probability equivalence</h2></div>
+    <p class="muted">For each intermediate wealth X you name the probability p that makes a certain X
+    indifferent to a gamble between the best and worst outcomes. Under expected utility that
+    probability <em>is</em> the normalised utility:</p>
+    <div class="note">p(X) = [ u(X) − u(lo) ] / [ u(hi) − u(lo) ],&nbsp;&nbsp;
+      u(W) = (W<sup>1−γ</sup> − 1) / (1 − γ)</div>
+    <p class="muted">γ is the value fitting your five answers best in least squares. The risk ladder
+    gives an independent bracket on the same parameter, which is reported beside it as a
+    consistency check rather than averaged in.</p></div>
+
+  <div class="card"><div class="hd"><span class="num">02</span><h2>Value function</h2></div>
+    <p class="muted">The same method applied to gains and losses from a reference point, using linear
+    probabilities during elicitation, as the course's own worked answers do:</p>
+    <div class="note">v(x) = x<sup>α</sup> for x ≥ 0,&nbsp;&nbsp; v(x) = −λ(−x)<sup>β</sup> for x &lt; 0<br>
+      p = (x / X)<sup>α</sup> &nbsp;⇒&nbsp; ln p = α ln(x / X), so α is a regression slope through the origin</div>
+    <p class="muted">Loss aversion needs care. The mixed gamble gives 0.5·G<sup>α</sup> = 0.5·λ·L<sup>β</sup>,
+    which only yields a scale-free λ when α equals β. Where they differ, λ is quoted at the common
+    curvature (α+β)/2 and the two curvatures are reported separately. A loss aversion coefficient
+    without its curvature assumption attached is not a meaningful number.</p></div>
+
+  <div class="card"><div class="hd"><span class="num">03</span><h2>Probability weighting</h2></div>
+    <p class="muted">A certainty equivalent C for a prospect paying X with probability p satisfies
+    C<sup>α</sup> = w(p)·X<sup>α</sup>, so each answer reveals one point of the weighting function
+    directly. The Kahneman-Tversky one-parameter form is then fitted across them:</p>
+    <div class="note">w(p) = p<sup>γ</sup> / [ p<sup>γ</sup> + (1−p)<sup>γ</sup> ]<sup>1/γ</sup></div>
+    <p class="muted">Two answers against one parameter leaves the fit over-identified on purpose. The
+    residual is the diagnostic that says whether one curvature parameter can describe you at all.</p></div>
+
+  <div class="card"><div class="hd"><span class="num">04</span><h2>Time preference</h2></div>
+    <p class="muted">The twelve-versus-thirteen-month pair sits entirely in the future, so present bias
+    cancels and the monthly discount factor falls out on its own. The today-versus-one-month pair
+    then isolates the present-bias factor:</p>
+    <div class="note">δ = 10,000 / x₁₃ &nbsp;&nbsp;then&nbsp;&nbsp; β = 10,000 / (δ · x₁)</div></div>
+
+  <div class="card"><div class="hd"><span class="num">05</span><h2>The expected utility portfolio</h2></div>
+    <p class="muted">Maximising U = E(r) − ½·A·σ² along the capital allocation line gives the textbook
+    solution, with A read off as your relative risk aversion:</p>
+    <div class="note">y* = [ E(r<sub>P</sub>) − r<sub>f</sub> ] / ( A · σ<sub>P</sub>² )</div>
+    <p class="muted">Borrowing is capped at zero as a policy choice, not a theoretical one. The
+    unconstrained y* is reported too, because the gap between them is the entire argument for
+    having a leverage policy.</p></div>
+
+  <div class="card"><div class="hd"><span class="num">06</span><h2>The behavioral portfolios</h2></div>
+    <p class="muted">Two of them, following Shefrin and Statman (2000). The single-account version
+    maximises the SP/A objective of Lopes (1987), which distorts the decumulative distribution
+    rather than individual probabilities: fear pulls weight onto the worst outcomes, hope pushes it
+    onto the best.</p>
+    <div class="note">h(D) = ω·D<sup>1+q<sub>s</sub></sup> + (1−ω)·[ 1 − (1−D)<sup>1+q<sub>p</sub></sup> ]<br>
+      V = ∫ h(D(w)) dw &nbsp;+&nbsp; β<sub>A</sub> · Pr(W ≥ A)</div>
+    <p class="muted">ω comes straight from your own hundred-point split and β<sub>A</sub> from your stated
+    trade-off, so neither is assumed. The two shape parameters are mapped from parameters that were
+    elicited: fear from loss aversion as q<sub>s</sub> = λ − 1, hope from weighting curvature as
+    q<sub>p</sub> = 1/γ<sub>w</sub> − 1. Both mappings vanish at the neutral value, and both are stated
+    here rather than buried, because they are the one modelling choice the data does not force.</p>
+    <p class="muted">The layered version follows Das, Markowitz, Scheid and Statman (2010): each layer is
+    optimised against its own threshold and its own acceptable failure probability, and the
+    covariance between layers is never consulted. That omission is not an oversight in the model, it
+    is the model. Since the frontier is defined precisely by those covariance terms, a portfolio
+    assembled without them lands inside it except by coincidence.</p></div>
+
+  <div class="card"><div class="hd"><span class="num">07</span><h2>Why the floor is tested at one year</h2></div>
+    <p class="muted">A floor you can breach in year two is not a floor you experience as safe. Tested only
+    at the finish, a floor almost never binds: over five years at any positive Sharpe ratio, equity
+    beats cash even deep in the left tail, so the SP/A optimum sits at the corner and the behavioral
+    model has nothing to say. Testing it at the one-year mark as well is what makes it bite, and it
+    matches what the model is about, which is how a holding feels along the way.</p></div>
+
+  <div class="card"><div class="hd"><span class="num">08</span><h2>The market inputs, and how much to trust them</h2></div>
+    <div class="overflow"><table class="data">
+      <thead><tr><th>Input</th><th class="n">Value</th><th>Where it comes from</th></tr></thead>
+      <tbody>
+        <tr><td>Risk-free rate</td><td class="n">${pct(RF)}</td><td class="muted">91-day Treasury bill, 21 August 2026</td></tr>
+        <tr><td>Risky portfolio, in sample</td><td class="n">${pct(PS1.tangency.mu)} / ${pct(PS1.tangency.sigma)}</td>
+            <td class="muted">The Problem Statement 1 maximum-Sharpe portfolio, 60 stocks</td></tr>
+        <tr><td>Risky portfolio, base case</td><td class="n">${pct(eng.mu)} / ${pct(eng.sigma)}</td>
+            <td class="muted">Expected return shrunk 75% toward a 12% long-run prior; volatility untouched</td></tr>
+        <tr><td>Aspiration sleeve beta</td><td class="n">${SLEEVE_BETA.toFixed(3)}</td>
+            <td class="muted">Derived, not assumed: the core is the tangency portfolio, so every subset is priced off it</td></tr>
+      </tbody></table></div>
+    <div class="note">The Problem Statement 1 expected returns are three-year in-sample means taken over
+      a strong run in Indian equities. The standard error on a mean return estimated that way is
+      roughly 17% a year, so a reported Sharpe ratio of ${((PS1.tangency.mu-RF)/PS1.tangency.sigma).toFixed(2)}
+      is not something to plan a household balance sheet around. Volatility estimates from the same
+      data are far more reliable, which is why only the return is shrunk. Every result is shown
+      under all three input sets so that the reader can see how much of the advice is the client and
+      how much is the estimate.</div></div>
+
+  <div class="card"><div class="hd"><h2>References</h2></div>
+    <p class="muted" style="font-size:13.5px; line-height:1.7">
+      Kahneman, D. and Tversky, A. (1979). Prospect theory: an analysis of decision under risk. <em>Econometrica</em> 47(2), 263-291.<br>
+      Lopes, L. (1987). Between hope and fear: the psychology of risk. <em>Advances in Experimental Social Psychology</em> 20, 255-295.<br>
+      Shefrin, H. and Statman, M. (2000). Behavioral portfolio theory. <em>Journal of Financial and Quantitative Analysis</em> 35(2), 127-151.<br>
+      Das, S., Markowitz, H., Scheid, J. and Statman, M. (2010). Portfolio optimization with mental accounts. <em>Journal of Financial and Quantitative Analysis</em> 45(2), 311-334.<br>
+      Soto, C. and John, O. (2017). Short and extra-short forms of the Big Five Inventory 2. <em>Journal of Research in Personality</em> 68, 69-81.<br>
+      Benartzi, S. and Thaler, R. (1995). Myopic loss aversion and the equity premium puzzle. <em>Quarterly Journal of Economics</em> 110(1), 73-92.
+    </p></div>`;
+}
+
+/* ===================================================================
+   Wiring
+   =================================================================== */
+function download(name, text){
+  const b=new Blob([text],{type:"application/json"});
+  const a=el("a",{href:URL.createObjectURL(b), download:name});
+  document.body.append(a); a.click(); a.remove();
+}
+
+function show(tab){
+  ["survey","plan","group","method"].forEach(t=>{
+    $("p-"+t).classList.toggle("hide", t!==tab);
+    $("t-"+t).setAttribute("aria-selected", String(t===tab));
+  });
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+// The sample respondent is the second member of the pilot group, referenced rather
+// than copied, so there is only ever one version of that data in the file.
+const DEMO = () => PILOT[1];
+
+function boot(){
+  buildLadder(); buildBFI(); buildUtil(); buildVF(); buildPW();
+  syncOutputs(); load(); progress(); renderMethod();
+
+  document.addEventListener("input", e=>{
+    if(e.target.closest("#p-survey")){ syncOutputs(); save(); progress(); }
+  });
+  document.addEventListener("change", e=>{
+    if(e.target.closest("#p-survey")){ save(); progress(); }
+  });
+
+  ["survey","plan","group","method"].forEach(t=> $("t-"+t).onclick=()=>{
+    if(t==="plan"){ try{ renderPlan(analyse(readForm())); }
+                    catch(err){ toast("Finish the survey first"); return; } }
+    if(t==="group") renderGroup();
+    show(t);
+  });
+
+  $("go").onclick=()=>{
+    try{ renderPlan(analyse(readForm())); show("plan"); }
+    catch(err){ toast("Something is missing: "+err.message); }
+  };
+  $("dl-json").onclick=()=>{
+    const d=readForm();
+    download(`response_${d.id||"respondent"}.json`, JSON.stringify(d,null,1));
+    toast("Saved. Send that file to whoever is compiling the group.");
+  };
+  $("demo").onclick=()=>{ writeForm(DEMO()); save(); progress(); toast("Filled with a sample respondent"); };
+  $("clear").onclick=()=>{ localStorage.removeItem(KEY); location.reload(); };
+
+  $("f-import").onchange=async e=>{
+    const files=[...e.target.files];
+    const loaded=[];
+    for(const f of files){
+      try{ const j=JSON.parse(await f.text());
+           (Array.isArray(j)?j:[j]).forEach(r=> loaded.push(r.input||r)); }
+      catch(err){ toast("Could not read "+f.name); }
+    }
+    if(loaded.length){ GROUP=loaded; renderGroup(); toast(`Loaded ${loaded.length} response(s)`); }
+  };
+  $("reset-group").onclick=()=>{ GROUP=PILOT.slice(); renderGroup(); };
+
+  const th=$("theme");
+  th.onclick=()=>{
+    const cur=document.documentElement.getAttribute("data-theme");
+    const next = cur==="dark" ? "light" : cur==="light" ? "dark"
+      : (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem("mba680.theme", next); }catch(e){}
+    if(!$("p-plan").classList.contains("hide")) renderPlan(analyse(readForm()));
+    if(!$("p-group").classList.contains("hide")) renderGroup();
+    renderMethod();
+  };
+  try{ const t=localStorage.getItem("mba680.theme");
+       if(t) document.documentElement.setAttribute("data-theme",t); }catch(e){}
+
+  GROUP=PILOT.slice();
+}
+
+/* The pilot peer group from the report, so the group view is never empty. */
+const PILOT = [
+ {id:"M1",name:"Member 1 \u00b7 Cautious accumulator",age:23,corpus:800000,horizon:5,goal:"Capital preservation",ladderRow:5,td1:10250,td13:10020,utilP:[0.27, 0.6, 0.78, 0.92, 0.99],gainP:[0.19, 0.36, 0.6],lossP:[0.13, 0.29, 0.53],mixedGain:38000,pwCe:[1000, 5750],bfi:[3, 5, 4, 4, 3, 3, 2, 2, 2, 3, 2, 4, 4, 4, 3, 3, 2, 2, 2, 3, 3, 4, 4, 3, 3, 3, 2, 2, 3, 3],floor:800000,floorAlpha:0.05,income:0,aspiration:1400000,secPoints:80,tradeoff:12000},
+ {id:"M2",name:"Member 2 \u00b7 Balanced planner",age:24,corpus:1500000,horizon:5,goal:"Wealth creation",ladderRow:2,td1:10250,td13:10070,utilP:[0.16, 0.4, 0.65, 0.86, 0.91],gainP:[0.14, 0.32, 0.56],lossP:[0.13, 0.3, 0.54],mixedGain:26000,pwCe:[1450, 7000],bfi:[4, 4, 4, 3, 4, 2, 2, 3, 4, 4, 3, 4, 3, 3, 3, 3, 2, 2, 3, 4, 4, 4, 4, 3, 3, 3, 3, 2, 3, 3],floor:1200000,floorAlpha:0.1,income:60000,aspiration:2600000,secPoints:55,tradeoff:40000},
+ {id:"M3",name:"Member 3 \u00b7 Growth seeker",age:23,corpus:1000000,horizon:7,goal:"Wealth creation",ladderRow:2,td1:10250,td13:10270,utilP:[0.11, 0.29, 0.52, 0.71, 0.84],gainP:[0.11, 0.26, 0.53],lossP:[0.12, 0.29, 0.54],mixedGain:16500,pwCe:[1450, 8000],bfi:[4, 3, 3, 2, 4, 2, 3, 3, 4, 4, 4, 3, 4, 2, 2, 2, 3, 3, 4, 5, 3, 3, 3, 2, 2, 2, 3, 2, 3, 1],floor:500000,floorAlpha:0.2,income:0,aspiration:3000000,secPoints:30,tradeoff:90000},
+ {id:"M4",name:"Member 4 \u00b7 Impatient saver",age:25,corpus:600000,horizon:4,goal:"A specific purchase",ladderRow:3,td1:12600,td13:10120,utilP:[0.17, 0.42, 0.68, 0.86, 0.93],gainP:[0.14, 0.3, 0.52],lossP:[0.13, 0.29, 0.55],mixedGain:28000,pwCe:[1300, 6800],bfi:[4, 4, 2, 3, 4, 2, 3, 4, 3, 3, 3, 4, 3, 3, 2, 3, 2, 3, 2, 3, 4, 3, 2, 3, 3, 2, 3, 3, 3, 3],floor:450000,floorAlpha:0.1,income:0,aspiration:1100000,secPoints:60,tradeoff:25000},
+ {id:"M5",name:"Member 5 \u00b7 Capital protector",age:26,corpus:2500000,horizon:5,goal:"Capital preservation",ladderRow:10,td1:10350,td13:10120,utilP:[0.33, 0.69, 0.88, 0.96, 0.99],gainP:[0.2, 0.4, 0.67],lossP:[0.11, 0.28, 0.51],mixedGain:45500,pwCe:[850, 5550],bfi:[3, 4, 4, 4, 3, 4, 2, 1, 2, 2, 2, 4, 4, 4, 3, 4, 3, 2, 2, 3, 3, 3, 4, 4, 4, 3, 2, 1, 2, 4],floor:2400000,floorAlpha:0.02,income:120000,aspiration:3300000,secPoints:90,tradeoff:15000},
+ {id:"M6",name:"Member 6 \u00b7 Lottery optimist",age:22,corpus:700000,horizon:6,goal:"Wealth creation",ladderRow:2,td1:11950,td13:10330,utilP:[0.12, 0.35, 0.57, 0.75, 0.89],gainP:[0.12, 0.28, 0.51],lossP:[0.13, 0.31, 0.53],mixedGain:20000,pwCe:[1650, 5500],bfi:[4, 4, 3, 3, 4, 2, 2, 3, 3, 4, 4, 3, 3, 2, 2, 2, 3, 3, 3, 4, 5, 3, 3, 2, 2, 1, 3, 4, 3, 2],floor:300000,floorAlpha:0.25,income:0,aspiration:2800000,secPoints:25,tradeoff:70000}
+];
+
+boot();
+</script>
+</body>
+</html>

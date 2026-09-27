@@ -1,0 +1,7 @@
+{
+  "name": "mba680-ps2-report",
+  "private": true,
+  "description": "Builds the MBA680 Problem Statement 2 report from engine/outputs/analysis.json.",
+  "scripts": { "report": "node make_report.js" },
+  "dependencies": { "docx": "^9.0.0" }
+}
