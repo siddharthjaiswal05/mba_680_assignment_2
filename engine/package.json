@@ -2,6 +2,14 @@
   "name": "mba680-ps2-report",
   "private": true,
   "description": "Builds the MBA680 Problem Statement 2 report from engine/outputs/analysis.json.",
-  "scripts": { "report": "node make_report.js" },
-  "dependencies": { "docx": "^9.0.0" }
+  "scripts": {
+    "report": "node make_report.js",
+    "test": "node tests/xcheck.js && node tests/smoke.js && node tests/roundtrip.js"
+  },
+  "dependencies": {
+    "docx": "^9.0.0"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0"
+  }
 }
