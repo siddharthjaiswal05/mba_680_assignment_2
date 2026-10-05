@@ -462,14 +462,15 @@ def make_figures(res):
                label=f"{r['roll']}, A = {r['gamma_used']:.2f}")
         for j, v in enumerate(vals):
             ax.text(j + off, v + 0.12, f"{v:.1f}x", ha="center", fontsize=8, color=INK2)
-    ax.axhline(1.0, color=INK, lw=1.4, ls=(0, (5, 3)))
-    ax.annotate("no-borrowing cap, where both respondents actually end up",
-                xy=(1.9, 1.0), xytext=(0, 9), textcoords="offset points",
-                fontsize=8, color=INK2, ha="right")
+    # The bars fill the band on both sides of the cap line, so the line is named in
+    # the legend rather than annotated across them.
+    ax.axhline(1.0, color=INK, lw=1.4, ls=(0, (5, 3)),
+               label="no-borrowing cap, where both actually end up")
     ax.set_xticks(xs)
     ax.set_xticklabels(["PS1 as reported\nSharpe 1.03", "Base case\nSharpe 0.49",
                         "Stress case\nSharpe 0.31"], fontsize=8.5)
     ax.set_ylabel("Unconstrained y*, as a multiple of the corpus")
+    ax.set_ylim(0, max(max(r["portfolios"][s2]["y_star"] for s2 in names) for r in usable) * 1.22)
     ax.set_title("Both respondents want leverage under every input set, so the cap is what binds")
     ax.legend(loc="upper right"); ax.grid(axis="x", visible=False); _clean(ax)
     _save(fig, "c7_scenarios.png")

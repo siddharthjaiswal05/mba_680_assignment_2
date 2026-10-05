@@ -1,0 +1,311 @@
+{
+ "theme": {
+  "name": "MBA680 Behavioral Finance",
+  "head": "Cambria",
+  "body": "Calibri",
+  "navy": "1E2761",
+  "navyDeep": "151C45",
+  "ice": "CADCFC",
+  "white": "FFFFFF",
+  "ink": "1A1A2E",
+  "ink2": "55607A",
+  "ink3": "8A93A8",
+  "amber": "E9A13B",
+  "line": "DFE5F2",
+  "surface": "F6F8FD"
+ },
+ "slides": [
+  {
+   "layout": "title",
+   "title": "Personal Investment Advisor and Robo-Advisory Design",
+   "subtitle": "MBA680 Behavioral Finance  |  Problem Statement 2  |  Steps 1 to 6",
+   "team": [
+    "Abhinav Raj",
+    "Raghav Patidar",
+    "Shubham Raj",
+    "Siddharth Jaiswal"
+   ],
+   "kicker": "What four classmates told us, and what their answers could not tell us"
+  },
+  {
+   "layout": "statement",
+   "title": "The headline",
+   "big": "We can tell you how much equity to hold. We cannot yet tell you how to split it.",
+   "body": "The class survey identifies risk aversion, time preference, personality and the two curvatures of the value function. It does not identify loss aversion, the floor or the aspiration level, so the behavioral layers cannot be sized from stated preferences. Four extra questions close that gap, and they are already live in our portal."
+  },
+  {
+   "layout": "cards3",
+   "title": "What we did",
+   "cards": [
+    {
+     "n": "01",
+     "h": "Fielded the survey",
+     "b": "Four classmates completed Steps 1 to 4: the eight-row risk ladder, six time-preference rows, the 30-item BFI-2 subset, and the utility and value elicitations."
+    },
+    {
+     "n": "02",
+     "h": "Estimated what it identifies",
+     "b": "Risk aversion from the utility curve, a discount bracket from the time rows, five personality domains and fifteen facets, and both value-function curvatures."
+    },
+    {
+     "n": "03",
+     "h": "Built Step 5 on real inputs",
+     "b": "The 60-stock maximum-Sharpe portfolio from Problem Statement 1, 24.9% against 18.0%, not an illustrative market assumption."
+    }
+   ]
+  },
+  {
+   "layout": "table",
+   "title": "The peer group",
+   "head": [
+    "Roll",
+    "Age",
+    "Investable",
+    "Experience",
+    "Horizon",
+    "Goal",
+    "Usable"
+   ],
+   "rows": [
+    [
+     "251250039",
+     "25",
+     "Rs 90,000",
+     "Moderate",
+     "5 yrs",
+     "Wealth creation",
+     "Yes"
+    ],
+    [
+     "251250047",
+     "24",
+     "Rs 2 L",
+     "None",
+     "10 yrs",
+     "Wealth creation",
+     "No"
+    ],
+    [
+     "251250002",
+     "25",
+     "Rs 10 L",
+     "Limited",
+     "6 yrs",
+     "Wealth creation",
+     "Yes"
+    ],
+    [
+     "251250030",
+     "29",
+     "Rs 1 L",
+     "Limited",
+     "15 yrs",
+     "Specified goal",
+     "No"
+    ]
+   ],
+   "foot": "Two of the four submitted utility data we could not use. We left those cells empty rather than inventing a number, and specified the re-elicitation instead."
+  },
+  {
+   "layout": "figure",
+   "title": "Finding 1: the risk ladder cannot measure risk aversion",
+   "image": "c3_risk_ladder.png",
+   "lead": "Every rung offers a certain amount equal to the gamble's expected value.",
+   "points": [
+    "Under expected utility, a risk-averse person takes the certain amount at all eight rows and a risk-seeking person takes the gamble at all eight.",
+    "Roll 251250039 switches at R4. Roll 251250002 switches at R3.",
+    "No utility function over final wealth can produce a switch. These are not noise, they are violations of the model that would do the measuring.",
+    "So we classify the pattern and take risk aversion from the utility curve instead."
+   ]
+  },
+  {
+   "layout": "proof",
+   "title": "Finding 2: loss aversion is not identified at all",
+   "lead": "Every value-function row offers a certain amount against double or nothing, so the certain amount cancels:",
+   "math": [
+    "v(X) = p  v(2X)",
+    "X^a  =  p (2X)^a",
+    "p  =  (1/2)^a        so        a  =  -log2(p)"
+   ],
+   "body": "The gain rows fix the gain curvature and the loss rows fix the loss curvature, but nothing in the form ever compares their heights. Lambda needs a prospect with a gain on one side and a loss on the other. Without it, the single most important parameter in prospect theory is simply absent.",
+   "callout": "This is a property of the instrument, not of the respondents."
+  },
+  {
+   "layout": "stat",
+   "title": "Finding 3: V1, V2 and V3 are one question asked three times",
+   "stats": [
+    {
+     "v": "1.32",
+     "l": "implied by V1"
+    },
+    {
+     "v": "1.15",
+     "l": "implied by V2"
+    },
+    {
+     "v": "0.51",
+     "l": "implied by V3"
+    }
+   ],
+   "body": "Because the certain amount cancels, all three rows imply the identical curvature. A steady respondent gives the same number three times. Roll 251250039 gives a spread of 0.81, and averaging to 1.00 hides it entirely.",
+   "callout": "The spread is the measurement error on a single answer. It belongs in the report."
+  },
+  {
+   "layout": "figure",
+   "title": "Step 4: the two usable utility curves",
+   "image": "c1_utility.png",
+   "lead": "Probability equivalence, exactly as the Week 2 to 3 lecture sets it out.",
+   "points": [
+    "With U(A) = 0 and U(B) = 1, the probability that leaves a certain X indifferent to the gamble is the utility of X.",
+    "Roll 251250039 fits a relative risk aversion of 0.66, roll 251250002 fits 1.18.",
+    "That coefficient is exactly the A in the lecture's U = E(r) minus half A sigma squared, so it feeds Step 5 directly.",
+    "The dashed line is the log curve the lecture suggests, which is the special case A = 1."
+   ]
+  },
+  {
+   "layout": "figure",
+   "title": "Step 4: value functions, with one uncomfortable result",
+   "image": "c2_value.png",
+   "lead": "Every estimated loss curvature came out above one.",
+   "points": [
+    "A curvature above one means the loss limb gets steeper as losses grow.",
+    "Prospect theory predicts the opposite: diminishing sensitivity, a curvature below one.",
+    "Either this group genuinely shows increasing sensitivity to larger losses, which would be an unusual result, or the loss rows were answered with less care than the gain rows.",
+    "The spread statistic supports the second reading. A second pass would separate them."
+   ]
+  },
+  {
+   "layout": "cards3",
+   "title": "Step 5: how much to believe the inputs",
+   "lead": "Problem Statement 1 reports a Sharpe ratio of 1.03. That is not a number to plan a household around.",
+   "cards": [
+    {
+     "n": "24.9%",
+     "h": "As reported",
+     "b": "Three-year averages taken over a strong run in Indian equities. The error on a mean estimated that way is roughly 17% a year."
+    },
+    {
+     "n": "15.2%",
+     "h": "Base case, used",
+     "b": "Expected return cut three quarters of the way back to a long-run figure. Volatility is left untouched, because it is the reliable half of the estimate."
+    },
+    {
+     "n": "12.0%",
+     "h": "Stress case",
+     "b": "None of the screening premium survives. Reported so the reader can see how much of the advice is the client and how much is the estimate."
+    }
+   ]
+  },
+  {
+   "layout": "figure",
+   "title": "Step 5: the recommendation, and why it is the same for both",
+   "image": "c7_scenarios.png",
+   "lead": "The no-borrowing cap binds in all nine cells.",
+   "points": [
+    "Roll 251250039, A = 0.66, unconstrained y* of 4.1 times the corpus.",
+    "Roll 251250002, A = 1.18, unconstrained y* of 2.3 times the corpus.",
+    "Both are advised to hold 100% of their corpus in the Problem Statement 1 portfolio.",
+    "What separates the two respondents is not their preferences. It is whether you believe the expected return."
+   ]
+  },
+  {
+   "layout": "cards4",
+   "title": "Step 6: personality changes the process, not the weights",
+   "lead": "Risk aversion is already measured directly, so adjusting the equity weight for personality would count the same thing twice.",
+   "cards": [
+    {
+     "n": "251250039",
+     "h": "Low conscientiousness",
+     "b": "Will set the plan up and stop watching it. Automate the contribution, rebalance on a threshold, fix review dates in advance."
+    },
+    {
+     "n": "251250047",
+     "h": "Calm but genuinely conservative",
+     "b": "Took the certain amount at all eight rows. Low reactivity is not hidden risk tolerance. Use a glide path, not a single large allocation."
+    },
+    {
+     "n": "251250002",
+     "h": "Reasons in rupees",
+     "b": "Risk seeking at small stakes, cautious at real money. Frame everything in rupees, including the downside case."
+    },
+    {
+     "n": "251250030",
+     "h": "Re-interview first",
+     "b": "Refused every delay even at 34% a year, and left two tables unusable. Likely a short-term cash need or a quick fill-in."
+    }
+   ]
+  },
+  {
+   "layout": "table",
+   "title": "What is missing, and the four questions that fix it",
+   "lead": "Each is one line. Together they take about a minute, and they are already live in our portal, marked as extensions to the class form.",
+   "head": [
+    "",
+    "Question",
+    "What it unlocks"
+   ],
+   "rows": [
+    [
+     "E1",
+     "Tails you lose Rs 10,000, heads you win G. How big must G be?",
+     "Loss aversion"
+    ],
+    [
+     "E2",
+     "A 10% chance of Rs 10,000. What certain amount feels as good? Same at 90%.",
+     "Probability weighting"
+    ],
+    [
+     "E3",
+     "Smallest amount you must still have, and how often you could fall below it.",
+     "The safety layer"
+    ],
+    [
+     "E4",
+     "The amount you would call success, and what you would pay for a better shot.",
+     "The aspiration layer"
+    ]
+   ],
+   "foot": "Without these four, the safety and potential split is the adviser's judgement wearing the respondent's data as a costume."
+  },
+  {
+   "layout": "cards3",
+   "title": "The robo-advisory portal",
+   "lead": "A single static page, no server and no account, so it opens on a phone in a classroom.",
+   "cards": [
+    {
+     "n": "01",
+     "h": "Fields the whole form",
+     "b": "All six class sections plus the four extensions, in plain English, with autosave and a one-click export of the respondent's answers."
+    },
+    {
+     "n": "02",
+     "h": "Fits and plots live",
+     "b": "Draws the respondent's own utility curve, value function and weighting function in the browser, using the same estimators as the report."
+    },
+    {
+     "n": "03",
+     "h": "Builds both portfolios",
+     "b": "The mean-variance allocation and the behavioral layers, against the real Problem Statement 1 frontier, with the advisory commentary generated from their own scores."
+    }
+   ],
+   "foot": "siddharthjaiswal05.github.io/mba_680_assignment_2"
+  },
+  {
+   "layout": "close",
+   "title": "What we would say to the client",
+   "points": [
+    "Hold the Problem Statement 1 portfolio, and hold all of it, if you are either of the two respondents whose data we could use.",
+    "Do not read the risk ladder as a measure of how risk averse you are. It cannot be one.",
+    "Answer four more questions and we can size your safety layer instead of asserting it.",
+    "Treat the expected return, not your own preferences, as the thing most likely to be wrong."
+   ],
+   "team": [
+    "Abhinav Raj",
+    "Raghav Patidar",
+    "Shubham Raj",
+    "Siddharth Jaiswal"
+   ]
+  }
+ ]
+}
