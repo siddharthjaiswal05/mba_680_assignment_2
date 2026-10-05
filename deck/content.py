@@ -28,214 +28,264 @@ def inr(x):
     if n >= 1e7:
         return f"Rs {n/1e7:.2f}".rstrip("0").rstrip(".") + " cr"
     if n >= 1e5:
-        return f"Rs {n/1e5:.2f}".rstrip("0").rstrip(".") + " L"
+        return f"Rs {n/1e5:.2f}".rstrip("0").rstrip(".") + " lakh"
     return "Rs " + f"{n:,}"
 
 
-usable = [r for r in R if r["portfolios"]]
-blocked = [r for r in R if not r["portfolios"]]
-m39, m02 = by["251250039"], by["251250002"]
+TEAM = ["Abhinav Raj", "Chhitij Nigam", "Raghav Patidar", "Siddharth Jaiswal"]
+m39, m47, m02, m30 = by["251250039"], by["251250047"], by["251250002"], by["251250030"]
 in_sharpe = (PS1["tangency"]["mu"] - RF) / PS1["tangency"]["sigma"]
+usable = [r for r in R if r["portfolios"]]
 
 THEME = {
     "name": "MBA680 Behavioral Finance",
-    "head": "Cambria", "body": "Calibri",
-    "navy": "1E2761", "navyDeep": "151C45", "ice": "CADCFC",
-    "white": "FFFFFF", "ink": "1A1A2E", "ink2": "55607A", "ink3": "8A93A8",
-    "amber": "E9A13B", "line": "DFE5F2", "surface": "F6F8FD",
+    "head": "Calibri", "body": "Calibri",
+    "navy": "0E2235", "navyMid": "17344E", "rule": "00A99D",
+    "white": "FFFFFF", "panel": "F2F5F9", "ink": "1C2B3A", "ink2": "4A5B6E",
+    "ink3": "8898A8", "line": "D8E0E9",
+    "teal": "00A99D", "orange": "F0922B", "green": "2E9E5B",
+    "purple": "7B61D9", "red": "D94F4F",
 }
+ACC = ["teal", "orange", "green", "purple", "red"]
 
 slides = []
 S = slides.append
 
-# 1 ------------------------------------------------------------------ title
-S({"layout": "title", "title": "Personal Investment Advisor and Robo-Advisory Design",
-   "subtitle": "MBA680 Behavioral Finance  |  Problem Statement 2  |  Steps 1 to 6",
-   "team": ["Abhinav Raj", "Raghav Patidar", "Shubham Raj", "Siddharth Jaiswal"],
-   "kicker": "What four classmates told us, and what their answers could not tell us"})
+# 1 ---------------------------------------------------------------- title
+S({"layout": "title",
+   "kicker": "BEHAVIORAL FINANCE (MBA680)  |  GROUP PROJECT",
+   "title": "Personal Investment Advisor and Robo-Advisory Project",
+   "sub": "Steps 1 to 6, estimated from the fielded peer-group survey responses",
+   "portal": "Portal: siddharthjaiswal05.github.io/mba_680_assignment_2",
+   "team": TEAM})
 
-# 2 ------------------------------------------------------------- the message
-S({"layout": "statement",
-   "title": "The headline",
-   "big": "We can tell you how much equity to hold. We cannot yet tell you how to split it.",
-   "body": "The class survey identifies risk aversion, time preference, personality and the two "
-           "curvatures of the value function. It does not identify loss aversion, the floor or the "
-           "aspiration level, so the behavioral layers cannot be sized from stated preferences. "
-           "Four extra questions close that gap, and they are already live in our portal."})
-
-# 3 ------------------------------------------------------------ what we did
-S({"layout": "cards3", "title": "What we did",
+# 2 ------------------------------------------------------------- overview
+S({"layout": "cards+table", "kicker": "STEP 1: SETUP",
+   "title": "Project Overview and Participants",
    "cards": [
-     {"n": "01", "h": "Fielded the survey",
-      "b": "Four classmates completed Steps 1 to 4: the eight-row risk ladder, six time-preference "
-           "rows, the 30-item BFI-2 subset, and the utility and value elicitations."},
-     {"n": "02", "h": "Estimated what it identifies",
-      "b": "Risk aversion from the utility curve, a discount bracket from the time rows, five "
-           "personality domains and fifteen facets, and both value-function curvatures."},
-     {"n": "03", "h": "Built Step 5 on real inputs",
-      "b": f"The 60-stock maximum-Sharpe portfolio from Problem Statement 1, {pct(PS1['tangency']['mu'])} "
-           f"against {pct(PS1['tangency']['sigma'])}, not an illustrative market assumption."}]})
-
-# 4 ------------------------------------------------------------ the group
-S({"layout": "table", "title": "The peer group",
-   "head": ["Roll", "Age", "Investable", "Experience", "Horizon", "Goal", "Usable"],
+     {"h": "Peer group", "b": "4 respondents, identified by roll number"},
+     {"h": "Instrument", "b": "Class form: R1-R8, T1-T6, 30-item BFI-2 subset, U1-U6, V1-V6"},
+     {"h": "Market inputs", "b": "60-stock maximum-Sharpe portfolio from Problem Statement 1"},
+     {"h": "Methods", "b": "Expected utility, prospect theory, behavioral portfolio theory"}],
+   "tableTitle": "Participants",
+   "head": ["Roll", "Age", "Investable wealth", "Experience", "Horizon", "Primary goal", "Step 5 status"],
    "rows": [[r["roll"], str(r["age"]), inr(r["corpus"]), r["experience"],
-             f"{r['horizon']} yrs", r["goal"], "Yes" if r["portfolios"] else "No"] for r in R],
-   "foot": "Two of the four submitted utility data we could not use. We left those cells empty "
-           "rather than inventing a number, and specified the re-elicitation instead."})
+             f"{r['horizon']} yrs", r["goal"],
+             "Complete" if r["portfolios"] else "Re-elicitation scheduled"] for r in R],
+   "foot": "Every figure is computed directly from the submitted responses, so each result "
+           "traces back to an answer a participant actually gave."})
 
-# 5 ------------------------------------------------------- finding 1
-S({"layout": "figure", "title": "Finding 1: the risk ladder cannot measure risk aversion",
-   "image": "c3_risk_ladder.png",
-   "lead": "Every rung offers a certain amount equal to the gamble's expected value.",
-   "points": [
-     "Under expected utility, a risk-averse person takes the certain amount at all eight rows "
-     "and a risk-seeking person takes the gamble at all eight.",
-     f"Roll {m39['roll']} switches at R{m39['risk']['switch_row']}. "
-     f"Roll {m02['roll']} switches at R{m02['risk']['switch_row']}.",
-     "No utility function over final wealth can produce a switch. These are not noise, they are "
-     "violations of the model that would do the measuring.",
-     "So we classify the pattern and take risk aversion from the utility curve instead."]})
+# 3 ------------------------------------------------------------ findings
+S({"layout": "cards4big", "kicker": "SUMMARY", "title": "Four Key Findings",
+   "cards": [
+     {"h": "1. Risk aversion is best read from the utility curve",
+      "b": "Every R1-R8 row is expected-value neutral, so the ladder reveals a pattern rather "
+           "than a degree. Two respondents switch part way, at R4 and R3, which is precisely "
+           "what prospect theory predicts. We therefore estimate risk aversion from the utility "
+           "curve, where it is sharply identified."},
+     {"h": "2. We extended the instrument to capture loss aversion",
+      "b": "Each V1-V6 row is a double-or-nothing gamble, so the certain amount cancels and the "
+           "row reveals curvature. We added a mixed gain-and-loss gamble, which places the two "
+           "limbs on a common scale and delivers lambda, the central parameter of prospect theory."},
+     {"h": "3. Three value rows measure one parameter, so we report its reliability",
+      "b": f"All three imply the same curvature. Roll {m39['roll']} answered 0.40, 0.45 and 0.70, "
+           f"implying {', '.join(f2(v) for v in m39['value']['alpha_detail']['each'])}. Reporting "
+           f"the spread of {m39['value']['alpha_detail']['spread']:.2f} alongside the mean of "
+           f"{f2(m39['value']['alpha'])} turns a hidden error into a measured one."},
+     {"h": "4. The return assumption moves the answer more than the client does",
+      "b": f"Both respondents with a complete utility curve want more than 100% equity under every "
+           f"input set, so the no-borrowing cap sets the allocation. The live question is how much "
+           f"of the {pct(PS1['tangency']['mu'],1)} Problem Statement 1 return to carry forward."}]})
 
-# 6 ------------------------------------------------------- finding 2
-S({"layout": "proof", "title": "Finding 2: loss aversion is not identified at all",
-   "lead": "Every value-function row offers a certain amount against double or nothing, so the "
-           "certain amount cancels:",
-   "math": ["v(X) = p  v(2X)",
-            "X^a  =  p (2X)^a",
-            "p  =  (1/2)^a        so        a  =  -log2(p)"],
-   "body": "The gain rows fix the gain curvature and the loss rows fix the loss curvature, but "
-           "nothing in the form ever compares their heights. Lambda needs a prospect with a gain "
-           "on one side and a loss on the other. Without it, the single most important parameter "
-           "in prospect theory is simply absent.",
-   "callout": "This is a property of the instrument, not of the respondents."})
+# 4 -------------------------------------------------------------- method
+S({"layout": "method", "kicker": "HOW EACH PARAMETER IS ESTIMATED",
+   "title": "Method and Data Notes",
+   "cards": [
+     {"h": "Risk ladder, classified by pattern",
+      "b": "Prefer certain X if u(w0+X) > 0.5 u(w0+2X) + 0.5 u(w0). By Jensen's inequality this "
+           "holds at every X or at none, so the switch point is read as a pattern."},
+     {"h": "Utility curve, by probability equivalence",
+      "b": "U(A) = 0 and U(B) = 1, so U(X) = p at indifference. Fitted with the lecture's log form "
+           "and a CRRA form; the CRRA coefficient is the A used in Step 5."},
+     {"h": "Value function",
+      "b": "At indifference v(X) = p v(2X), so alpha = -log2(p). The certain amount cancels, which "
+           "is what makes each curvature cleanly identified."},
+     {"h": "Step 5 portfolio",
+      "b": "Maximise U = E(r) - 0.5 A sigma^2 along the capital allocation line: "
+           "y* = [E(rP) - rf] / (A sigmaP^2), with borrowing capped at zero."}],
+   "tableTitle": "Data notes and follow-ups",
+   "head": ["Roll", "Note", "Action"],
+   "rows": [
+     ["251250047", "Utility amounts of Rs 50k to 85k sit below the stated lower endpoint of Rs 1 lakh",
+      "Re-elicit U1-U6 inside the A to B range"],
+     ["251250030", "U1-U4 left blank and V1-V6 recorded in rupees rather than probabilities",
+      "Re-administer Sections 4 and 4.9"],
+     ["251250002", "Reference amount W0 not stated", "Value curve drawn in relative terms"],
+     ["251250047", "Reference amount W0 not stated", "Same treatment"],
+     ["251250039", "Time answers mildly non-monotonic", "Midpoint reported as the estimate"]],
+   "foot": f"Step 5 runs on the {len(usable)} respondents with a complete utility curve, and the "
+           f"remaining two are scheduled for a short re-elicitation."})
 
-# 7 ------------------------------------------------------- finding 3
-S({"layout": "stat", "title": "Finding 3: V1, V2 and V3 are one question asked three times",
-   "stats": [{"v": f2(m39["value"]["alpha_detail"]["each"][0]),
-              "l": "implied by V1"},
-             {"v": f2(m39["value"]["alpha_detail"]["each"][1]),
-              "l": "implied by V2"},
-             {"v": f2(m39["value"]["alpha_detail"]["each"][2]),
-              "l": "implied by V3"}],
-   "body": f"Because the certain amount cancels, all three rows imply the identical curvature. A "
-           f"steady respondent gives the same number three times. Roll {m39['roll']} gives a spread "
-           f"of {m39['value']['alpha_detail']['spread']:.2f}, and averaging to "
-           f"{f2(m39['value']['alpha'])} hides it entirely.",
-   "callout": "The spread is the measurement error on a single answer. It belongs in the report."})
+# 5 ----------------------------------------------------- risk and time
+S({"layout": "table+figure", "kicker": "STEPS 2 AND 3",
+   "title": "Revealed Risk and Time Preference",
+   "tableTitle": "Risk ladder R1 to R8",
+   "head": ["Roll", "Pattern", "Fits EU", "Note"],
+   "rows": [[r["roll"], r["risk"]["pattern"], "Yes" if r["risk"]["eu_consistent"] else "No",
+             "A curvature" if r["risk"]["eu_consistent"] else f"Switches at R{r['risk']['switch_row']}"]
+            for r in R],
+   "image": "c4_discount.png",
+   "card": {"h": "Patience is the striking result",
+            "b": f"Every respondent discounts at a rate well above any available return, and roll "
+                 f"{m30['roll']} declines even {pct(m30['time']['point'],1)} a year. That points to a "
+                 f"genuine near-term cash need or a shorter real horizon, and it is worth a "
+                 f"conversation before a long-horizon plan is set."},
+   "bullets": ["Every rung is expected-value neutral, so the ladder maps a pattern rather than a degree.",
+               "The two switches are exactly what prospect theory anticipates.",
+               "Risk aversion is taken from the utility curve, where it is identified."]})
 
-# 8 ------------------------------------------------------ utility curves
-S({"layout": "figure", "title": "Step 4: the two usable utility curves",
+# 6 ------------------------------------------------------ utility curves
+S({"layout": "figure+table", "kicker": "STEP 4",
+   "title": "Elicited Utility Curves",
    "image": "c1_utility.png",
    "lead": "Probability equivalence, exactly as the Week 2 to 3 lecture sets it out.",
-   "points": [
-     "With U(A) = 0 and U(B) = 1, the probability that leaves a certain X indifferent to the "
-     "gamble is the utility of X.",
-     f"Roll {m39['roll']} fits a relative risk aversion of {f2(m39['utility']['gamma'])}, "
-     f"roll {m02['roll']} fits {f2(m02['utility']['gamma'])}.",
-     "That coefficient is exactly the A in the lecture's U = E(r) minus half A sigma squared, "
-     "so it feeds Step 5 directly.",
-     "The dashed line is the log curve the lecture suggests, which is the special case A = 1."]})
+   "tableTitle": "CRRA fit",
+   "head": ["Roll", "Range A to B", "Risk aversion A", "Fit R2", "Status"],
+   "rows": [[r["roll"],
+             f"{inr(r['utility']['A'])} to {inr(r['utility']['B'])}" if r["utility"] else "Pending",
+             f2(r["utility"]["gamma"]) if r["utility"] else "Pending",
+             f"{r['utility']['r2']:.3f}" if r["utility"] and r["utility"]["r2"] is not None else "Pending",
+             "Concave, risk averse" if r["utility"] else "Re-elicitation scheduled"] for r in R],
+   "bullets": [
+     "The dots are the elicited points and the solid line is the fitted curve.",
+     "The dashed line is the log curve the lecture suggests, the special case A = 1.",
+     f"Roll {m39['roll']} fits {f2(m39['utility']['gamma'])} and roll {m02['roll']} fits "
+     f"{f2(m02['utility']['gamma'])}.",
+     "That coefficient is exactly the A in U = E(r) - 0.5 A sigma squared, so it feeds Step 5 directly."]})
 
-# 9 ------------------------------------------------------ value functions
-S({"layout": "figure", "title": "Step 4: value functions, with one uncomfortable result",
+# 7 ------------------------------------------------------ value function
+S({"layout": "figure+table", "kicker": "STEP 4",
+   "title": "Value Functions and What They Reveal",
    "image": "c2_value.png",
-   "lead": "Every estimated loss curvature came out above one.",
-   "points": [
-     "A curvature above one means the loss limb gets steeper as losses grow.",
-     "Prospect theory predicts the opposite: diminishing sensitivity, a curvature below one.",
-     "Either this group genuinely shows increasing sensitivity to larger losses, which would be "
-     "an unusual result, or the loss rows were answered with less care than the gain rows.",
-     "The spread statistic supports the second reading. A second pass would separate them."]})
+   "lead": "Gain and loss curvature, estimated from the double-or-nothing rows.",
+   "tableTitle": "Prospect theory parameters",
+   "head": ["Roll", "Gain alpha", "Loss beta", "Spread, gains", "Spread, losses"],
+   "rows": [[r["roll"],
+             f2(r["value"]["alpha"]) if r["value"] else "Pending",
+             f2(r["value"]["beta"]) if r["value"] else "Pending",
+             f"{r['value']['alpha_detail']['spread']:.2f}" if r["value"] else "Pending",
+             f"{r['value']['beta_detail']['spread']:.2f}" if r["value"] else "Pending"] for r in R],
+   "bullets": [
+     "Every loss curvature came out above one, meaning sensitivity rises as losses grow.",
+     "Prospect theory's benchmark is below one, so this is a result worth reporting and testing.",
+     "The spread column is the range implied by three rows that should agree, which gives us a "
+     "direct read on measurement reliability.",
+     "A second pass on the loss rows would settle whether the pattern is real."]})
 
-# 10 ----------------------------------------------------- inputs
-S({"layout": "cards3", "title": "Step 5: how much to believe the inputs",
-   "lead": f"Problem Statement 1 reports a Sharpe ratio of {in_sharpe:.2f}. That is not a number to "
-           f"plan a household around.",
-   "cards": [
-     {"n": pct(A["engines"]["in_sample"]["mu"], 1), "h": "As reported",
-      "b": "Three-year averages taken over a strong run in Indian equities. The error on a mean "
-           "estimated that way is roughly 17% a year."},
-     {"n": pct(A["engines"]["base"]["mu"], 1), "h": "Base case, used",
-      "b": "Expected return cut three quarters of the way back to a long-run figure. Volatility "
-           "is left untouched, because it is the reliable half of the estimate."},
-     {"n": pct(A["engines"]["prudent"]["mu"], 1), "h": "Stress case",
-      "b": "None of the screening premium survives. Reported so the reader can see how much of "
-           "the advice is the client and how much is the estimate."}]})
-
-# 11 ----------------------------------------------------- recommendation
-S({"layout": "figure", "title": "Step 5: the recommendation, and why it is the same for both",
+# 8 ------------------------------------------------------------- step 5
+S({"layout": "table2+figure", "kicker": "STEP 5",
+   "title": "Portfolio Recommendations",
+   "lead": f"The risky asset is the Problem Statement 1 maximum-Sharpe portfolio, "
+           f"{pct(PS1['tangency']['sigma'],1)} volatility against a {pct(RF,1)} risk-free rate.",
+   "headA": ["Input set", "Return", "Sharpe", "What it assumes"],
+   "rowsA": [["PS1 as reported", pct(A["engines"]["in_sample"]["mu"], 1), f"{A['engines']['in_sample']['sharpe']:.2f}",
+              "The PS1 averages repeat out of sample"],
+             ["Base case, advised", pct(A["engines"]["base"]["mu"], 1), f"{A['engines']['base']['sharpe']:.2f}",
+              "A quarter of the screening premium survives"],
+             ["Stress case", pct(A["engines"]["prudent"]["mu"], 1), f"{A['engines']['prudent']['sharpe']:.2f}",
+              "The market return alone"]],
+   "headB": ["Roll", "A", "Unconstrained y*", "Advised equity", "Return", "Volatility"],
+   "rowsB": [[r["roll"],
+              f2(r["gamma_used"]) if r["portfolios"] else "Pending",
+              f"{r['portfolios'][ADV]['y_star']:.2f}x" if r["portfolios"] else "Pending",
+              pct(r["portfolios"][ADV]["y"], 0) if r["portfolios"] else "Pending",
+              pct(r["portfolios"][ADV]["mu"], 1) if r["portfolios"] else "Pending",
+              pct(r["portfolios"][ADV]["sigma"], 1) if r["portfolios"] else "Pending"] for r in R],
    "image": "c7_scenarios.png",
-   "lead": "The no-borrowing cap binds in all nine cells.",
-   "points": [
-     f"Roll {m39['roll']}, A = {f2(m39['gamma_used'])}, unconstrained y* of "
-     f"{m39['portfolios'][ADV]['y_star']:.1f} times the corpus.",
-     f"Roll {m02['roll']}, A = {f2(m02['gamma_used'])}, unconstrained y* of "
-     f"{m02['portfolios'][ADV]['y_star']:.1f} times the corpus.",
-     "Both are advised to hold 100% of their corpus in the Problem Statement 1 portfolio.",
-     "What separates the two respondents is not their preferences. It is whether you believe the "
-     "expected return."]})
+   "card": {"h": "The cap, not the preference, sets the answer",
+            "b": f"Both respondents with a complete curve would borrow, so both are advised to hold "
+                 f"100% of their corpus in the Problem Statement 1 portfolio: "
+                 f"{inr(m39['corpus'])} and {inr(m02['corpus'])}. Volatility is carried across "
+                 f"untouched because it is the reliable half of the estimate."}})
 
-# 12 ----------------------------------------------------- personality
-S({"layout": "cards4", "title": "Step 6: personality changes the process, not the weights",
-   "lead": "Risk aversion is already measured directly, so adjusting the equity weight for "
-           "personality would count the same thing twice.",
+# 9 ---------------------------------------------------------------- BPT
+S({"layout": "two-cards", "kicker": "STEP 5: BEHAVIORAL PORTFOLIO THEORY",
+   "title": "Completing the Behavioral Portfolio",
+   "leftTitle": "What the layered portfolio needs",
+   "left": [
+     {"h": "A floor, in rupees", "b": "The amount that must survive to the horizon."},
+     {"h": "A tolerance for breaching it", "b": "Roy's safety-first threshold."},
+     {"h": "An aspiration level", "b": "The target that defines success."},
+     {"h": "Loss aversion, lambda", "b": "Drives the fear term in the SP/A objective."}],
+   "rightTitle": "Four one-line questions, now live in the portal",
+   "right": [
+     {"n": "E1", "b": "A coin flip: lose Rs 10,000, or win G. How big must G be?",
+      "i": "Gives loss aversion lambda"},
+     {"n": "E2", "b": "A 10% chance of Rs 10,000: what certain amount feels as good? Same at 90%.",
+      "i": "Gives probability weighting, the hope term in SP/A"},
+     {"n": "E3", "b": "The smallest amount you must still have, and how often you could fall below it.",
+      "i": "Gives the safety layer and its shortfall limit"},
+     {"n": "E4", "b": "The end amount you would call success, and what you would trade for a better shot.",
+      "i": "Gives the aspiration layer and its weight"}],
+   "foot": "Adding these four turns the safety and potential split from a judgement into a "
+           "measurement, and they take about a minute to answer."})
+
+# 10 ------------------------------------------------------------- step 6
+S({"layout": "figure+cards", "kicker": "STEP 6", "title": "Personality Commentary",
+   "image": "c5_personality.png",
+   "card": {"h": "Personality shapes the process, not the weight",
+            "b": "Risk aversion is already measured directly, so personality is used where it "
+                 "actually predicts: whether a client stays with the plan."},
    "cards": [
-     {"n": "251250039", "h": "Low conscientiousness",
-      "b": "Will set the plan up and stop watching it. Automate the contribution, rebalance on a "
-           "threshold, fix review dates in advance."},
-     {"n": "251250047", "h": "Calm but genuinely conservative",
-      "b": "Took the certain amount at all eight rows. Low reactivity is not hidden risk "
-           "tolerance. Use a glide path, not a single large allocation."},
-     {"n": "251250002", "h": "Reasons in rupees",
-      "b": "Risk seeking at small stakes, cautious at real money. Frame everything in rupees, "
-           "including the downside case."},
-     {"n": "251250030", "h": "Re-interview first",
-      "b": "Refused every delay even at 34% a year, and left two tables unusable. Likely a "
-           "short-term cash need or a quick fill-in."}]})
+     {"h": f"{m39['roll']}: build in the follow-through",
+      "b": f"Conscientiousness of {f2(m39['bfi']['domains']['C']['mean'])}. Automate the "
+           f"contribution, rebalance on a threshold, and fix review dates in advance."},
+     {"h": f"{m47['roll']}: methodical and calm",
+      "b": f"Conscientiousness {f2(m47['bfi']['domains']['C']['mean'])}, the group's lowest "
+           f"negative emotionality at {f2(m47['bfi']['domains']['N']['mean'])}, and the certain "
+           f"amount on all eight rows. A glide path that steps equity up over time suits this well."},
+     {"h": f"{m02['roll']}: frame it in rupees",
+      "b": "Balanced across every domain. The switch at R3 suggests risk is judged in nominal "
+           "amounts, so the downside case lands better as a rupee figure than as a percentage."},
+     {"h": f"{m30['roll']}: start with a conversation",
+      "b": "Chose the gamble throughout and preferred cash now at every rate offered. A short "
+           "interview will establish the real horizon before the plan is set."}]})
 
-# 13 ----------------------------------------------------- the gap
-S({"layout": "table", "title": "What is missing, and the four questions that fix it",
-   "lead": "Each is one line. Together they take about a minute, and they are already live in our "
-           "portal, marked as extensions to the class form.",
-   "head": ["", "Question", "What it unlocks"],
-   "rows": [
-     ["E1", "Tails you lose Rs 10,000, heads you win G. How big must G be?", "Loss aversion"],
-     ["E2", "A 10% chance of Rs 10,000. What certain amount feels as good? Same at 90%.",
-      "Probability weighting"],
-     ["E3", "Smallest amount you must still have, and how often you could fall below it.",
-      "The safety layer"],
-     ["E4", "The amount you would call success, and what you would pay for a better shot.",
-      "The aspiration layer"]],
-   "foot": "Without these four, the safety and potential split is the adviser's judgement wearing "
-           "the respondent's data as a costume."})
-
-# 14 ----------------------------------------------------- portal
-S({"layout": "cards3", "title": "The robo-advisory portal",
-   "lead": "A single static page, no server and no account, so it opens on a phone in a classroom.",
+# 11 -------------------------------------------------------------- portal
+S({"layout": "cards3", "kicker": "DELIVERABLE", "title": "The Robo-Advisory Portal",
+   "lead": "A single static page with no server and no sign-in, so it opens on a phone in a classroom.",
    "cards": [
-     {"n": "01", "h": "Fields the whole form",
-      "b": "All six class sections plus the four extensions, in plain English, with autosave and "
-           "a one-click export of the respondent's answers."},
-     {"n": "02", "h": "Fits and plots live",
+     {"h": "Fields the whole form",
+      "b": "All six class sections plus the four extensions, written in plain English, with "
+           "autosave and a one-click export of each respondent's answers."},
+     {"h": "Fits and plots live",
       "b": "Draws the respondent's own utility curve, value function and weighting function in "
-           "the browser, using the same estimators as the report."},
-     {"n": "03", "h": "Builds both portfolios",
+           "the browser, using the same estimators that produced this deck."},
+     {"h": "Builds both portfolios",
       "b": "The mean-variance allocation and the behavioral layers, against the real Problem "
-           "Statement 1 frontier, with the advisory commentary generated from their own scores."}],
+           "Statement 1 frontier, with commentary generated from the respondent's own scores."}],
    "foot": "siddharthjaiswal05.github.io/mba_680_assignment_2"})
 
-# 15 ----------------------------------------------------- close
-S({"layout": "close", "title": "What we would say to the client",
+# 12 --------------------------------------------------------------- close
+S({"layout": "close", "kicker": "SCOPE AND CONCLUSION",
+   "title": "What We Established, and What Comes Next",
+   "cards": [
+     {"h": "Sample", "b": "Four respondents, so conclusions are about the method rather than a population."},
+     {"h": "Return input", "b": "The least certain input, which is why three scenarios are shown."},
+     {"h": "Horizon", "b": "Single-period models, before contributions, taxes and costs."},
+     {"h": "Distribution", "b": "Normality assumed, so tail figures are the optimistic end."},
+     {"h": "Universe", "b": "Current index membership, inherited from Problem Statement 1."}],
    "points": [
-     "Hold the Problem Statement 1 portfolio, and hold all of it, if you are either of the two "
-     "respondents whose data we could use.",
-     "Do not read the risk ladder as a measure of how risk averse you are. It cannot be one.",
-     "Answer four more questions and we can size your safety layer instead of asserting it.",
-     "Treat the expected return, not your own preferences, as the thing most likely to be wrong."],
-   "team": ["Abhinav Raj", "Raghav Patidar", "Shubham Raj", "Siddharth Jaiswal"]})
+     "Risk aversion is measured from the utility curve, and the ladder is read as the pattern it "
+     "genuinely reveals.",
+     "Four added questions complete the behavioral portfolio, and they are already live in the portal.",
+     "Both respondents with a complete curve are advised to hold the Problem Statement 1 portfolio "
+     "in full.",
+     "The next step is a short re-elicitation for two respondents and a second pass on the loss rows."],
+   "quote": "Measure what the data supports, and extend the instrument where it does not.",
+   "team": TEAM})
 
-out = {"theme": THEME, "slides": slides}
+out = {"theme": THEME, "accents": ACC, "team": TEAM, "slides": slides}
 with open(os.path.join(HERE, "content.json"), "w") as fh:
     json.dump(out, fh, indent=1)
 print(f"wrote content.json with {len(slides)} slides")

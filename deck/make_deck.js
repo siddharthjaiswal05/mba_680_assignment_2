@@ -1,7 +1,7 @@
 /**
- * Builds MBA680_Presentation.pptx from content.json.
- * Layouts are defined once and filled by placeholder name, so the deck can be
- * restyled in PowerPoint without fighting it.
+ * Builds MBA680_Presentation.pptx from content.json, in the group's template:
+ * a navy header band with a teal rule, light panels carrying a coloured accent
+ * bar, and a footer naming the group on every slide.
  *   node make_deck.js
  */
 const fs = require("fs"), path = require("path");
@@ -9,212 +9,232 @@ const pptxgen = require(path.join(__dirname, "..", "engine", "node_modules", "pp
 
 const HERE = __dirname;
 const C = JSON.parse(fs.readFileSync(path.join(HERE, "content.json"), "utf8"));
-const T = C.theme;
+const T = C.theme, ACC = C.accents, TEAM = C.team;
 const FIG = path.join(HERE, "..", "figures");
 
 const pres = new pptxgen();
-pres.layout = "LAYOUT_WIDE";                 // 13.33 x 7.5 inches
-pres.author = "Abhinav Raj, Raghav Patidar, Shubham Raj, Siddharth Jaiswal";
+pres.layout = "LAYOUT_WIDE";                  // 13.33 x 7.5
+pres.author = TEAM.join(", ");
 pres.company = "IIT Kanpur, MBA680";
-pres.title = "MBA680 Personal Investment Advisor and Robo-Advisory Design";
+pres.title = "MBA680 Personal Investment Advisor and Robo-Advisory Project";
 pres.theme = { headFontFace: T.head, bodyFontFace: T.body };
 
-const W = 13.33, H = 7.5, M = 0.72;
-const CW = W - 2 * M;
+const W = 13.33, H = 7.5, M = 0.55, CW = W - 2 * M;
+const BAND = 1.28, RULE = 0.075;
+const N = C.slides.length;
+const FOOT = "MBA680 Group Project  |  " + TEAM.join(", ");
+const TOP = H - BAND - RULE - 0.3;
 
-/* ---------------------------------------------------------------- layouts */
-const footer = (dark) => ([
-  { text: { text: "MBA680 Behavioral Finance  |  Problem Statement 2",
-            options: { x: M, y: H - 0.52, w: 6, h: 0.3, fontSize: 10,
-                       color: dark ? T.ink3 : T.ink3, isTextBox: true, margin: 0 } } },
-  { placeholder: { options: { name: "slideNumber", type: "sldNum", x: W - M - 0.6,
-                              y: H - 0.52, w: 0.6, h: 0.3, fontSize: 10,
-                              color: T.ink3, align: "right" } } },
-]);
-
+pres.defineSlideMaster({ title: "TITLE", background: { color: T.navy } });
 pres.defineSlideMaster({
-  title: "DARK", background: { color: T.navy },
+  title: "CONTENT", background: { color: T.white },
   objects: [
-    { placeholder: { options: { name: "title", type: "title", x: M, y: 2.35, w: CW - 1.2,
-      h: 1.9, fontSize: 40, bold: true, color: T.white, valign: "bottom" } } },
-    { placeholder: { options: { name: "body", type: "body", x: M, y: 4.45, w: CW - 2.4,
-      h: 1.9, fontSize: 15, color: T.ice, valign: "top" } } },
+    { rect: { x: 0, y: 0, w: W, h: BAND, fill: { color: T.navy } } },
+    { rect: { x: 0, y: BAND, w: W, h: RULE, fill: { color: T.rule } } },
+    { text: { text: FOOT, options: { x: M, y: H - 0.42, w: 8.5, h: 0.26, fontSize: 8,
+      color: T.ink3, isTextBox: true, margin: 0, valign: "middle" } } },
+    { placeholder: { options: { name: "slideNumber", type: "sldNum", x: W - M - 1.2,
+      y: H - 0.42, w: 1.2, h: 0.26, fontSize: 8, color: T.ink3, align: "right" } } },
   ],
 });
 
-pres.defineSlideMaster({
-  title: "LIGHT", background: { color: T.white },
-  objects: [
-    { placeholder: { options: { name: "title", type: "title", x: M, y: 0.52, w: CW,
-      h: 0.86, fontSize: 30, bold: true, color: T.navy, valign: "middle" } } },
-    ...footer(false),
-  ],
-});
-
-pres.defineSlideMaster({
-  title: "ACCENT", background: { color: T.surface },
-  objects: [
-    { placeholder: { options: { name: "title", type: "title", x: M, y: 0.52, w: CW,
-      h: 0.86, fontSize: 30, bold: true, color: T.navy, valign: "middle" } } },
-    ...footer(false),
-  ],
-});
-
-/* ------------------------------------------------------------- primitives */
 const txt = (s, t, o) => s.addText(t, Object.assign({ isTextBox: true, margin: 0 }, o));
+const Y = v => H - v;                      // content.json uses a bottom-up y axis
 
-function lead(s, text, y) {
-  txt(s, text, { x: M, y, w: CW, h: 0.42, fontSize: 15, italic: true, color: T.ink2 });
+function head(s, kicker, title) {
+  txt(s, kicker, { x: M, y: 0.18, w: CW, h: 0.3, fontSize: 9.5, bold: true,
+    color: T.rule, valign: "middle" });
+  txt(s, title, { x: M, y: 0.52, w: CW, h: 0.6, fontSize: 24, bold: true,
+    color: T.white, valign: "middle" });
 }
 
-function bullets(s, items, o) {
-  s.addText(items.map((t, i) => ({
-    text: t, options: { bullet: { code: "25CF" }, breakLine: i < items.length - 1 },
-  })), Object.assign({ isTextBox: true, margin: 0, fontSize: 14.5, color: T.ink,
-    lineSpacingMultiple: 1.16, paraSpaceAfter: 9 }, o));
+function panel(s, x, yTop, w, h, accent) {
+  s.addShape(pres.ShapeType.rect, { x, y: yTop, w, h, fill: { color: T.panel } });
+  if (accent) s.addShape(pres.ShapeType.rect,
+    { x, y: yTop, w: 0.065, h, fill: { color: T[accent] } });
 }
 
-function card(s, x, y, w, h, n, head, body, accentNum) {
-  s.addShape(pres.ShapeType.roundRect, { x, y, w, h, rectRadius: 0.06,
-    fill: { color: T.white }, line: { color: T.line, width: 1 },
-    shadow: { type: "outer", color: T.navy, opacity: 0.1, blur: 10, offset: 2, angle: 90 } });
-  txt(s, n, { x: x + 0.34, y: y + 0.3, w: w - 0.68, h: 0.46,
-    fontSize: accentNum ? 26 : 19, bold: true, color: T.amber });
-  txt(s, head, { x: x + 0.34, y: y + 0.82, w: w - 0.68, h: 0.44,
-    fontSize: 16, bold: true, color: T.navy });
-  txt(s, body, { x: x + 0.34, y: y + 1.3, w: w - 0.68, h: h - 1.62,
-    fontSize: 12.5, color: T.ink2, lineSpacingMultiple: 1.2, valign: "top" });
+function sideCard(s, x, yTop, w, h, accent, hd, body, hs = 12.5, bs = 10.5) {
+  panel(s, x, yTop, w, h, accent);
+  txt(s, hd, { x: x + 0.26, y: yTop + 0.12, w: w - 0.5, h: 0.5, fontSize: hs,
+    bold: true, color: T.ink, valign: "top" });
+  txt(s, body, { x: x + 0.26, y: yTop + 0.62, w: w - 0.5, h: h - 0.78, fontSize: bs,
+    color: T.ink2, valign: "top", lineSpacingMultiple: 1.2 });
 }
 
-function fig(s, file, x, y, w, h) {
+function topCard(s, x, yTop, w, h, accent, hd, body) {
+  s.addShape(pres.ShapeType.rect, { x, y: yTop, w, h, fill: { color: T.panel } });
+  s.addShape(pres.ShapeType.rect, { x, y: yTop, w, h: 0.055, fill: { color: T[accent] } });
+  txt(s, hd, { x: x + 0.2, y: yTop + 0.14, w: w - 0.4, h: 0.4, fontSize: 12.5,
+    bold: true, color: T.ink, valign: "top" });
+  txt(s, body, { x: x + 0.2, y: yTop + 0.56, w: w - 0.4, h: h - 0.68, fontSize: 9.5,
+    color: T.ink2, valign: "top", lineSpacingMultiple: 1.18 });
+}
+
+function table(s, x, yTop, w, headRow, rows, widths, fs = 9.5) {
+  const scale = w / widths.reduce((a, b) => a + b, 0);
+  const colW = widths.map(v => v * scale);
+  const hdr = headRow.map(h => ({ text: String(h), options: { bold: true, color: T.white,
+    fill: { color: T.navy }, fontSize: fs, align: "center", valign: "middle" } }));
+  const body = rows.map((r, ri) => r.map(c => ({ text: String(c), options: { color: T.ink,
+    fontSize: fs, align: "center", valign: "middle",
+    fill: { color: ri % 2 === 0 ? "EAF4F3" : T.white } } })));
+  s.addTable([hdr, ...body], { x, y: yTop, w, colW,
+    border: { type: "solid", color: T.line, pt: 0.75 },
+    rowH: 0.34, margin: 0.06, autoPage: false });
+}
+
+function fig(s, file, x, yTop, w, h) {
   const p = path.join(FIG, file);
   if (!fs.existsSync(p)) return;
-  const buf = fs.readFileSync(p);
-  const iw = buf.readUInt32BE(16), ih = buf.readUInt32BE(20);
+  const b = fs.readFileSync(p), iw = b.readUInt32BE(16), ih = b.readUInt32BE(20);
   const r = Math.min(w / iw, h / ih);
-  s.addImage({ path: p, x: x + (w - iw * r) / 2, y: y + (h - ih * r) / 2,
-               w: iw * r, h: ih * r });
+  s.addImage({ path: p, x: x + (w - iw * r) / 2, y: yTop + (h - ih * r) / 2,
+    w: iw * r, h: ih * r });
 }
 
-/* ---------------------------------------------------------------- render */
-pres.addSection({ title: "Opening" });
-pres.addSection({ title: "Findings" });
-pres.addSection({ title: "Results" });
-pres.addSection({ title: "Close" });
-const sectionFor = i => i <= 1 ? "Opening" : i <= 6 ? "Findings" : i <= 13 ? "Results" : "Close";
+function bullets(s, x, yTop, items, w, h, size = 10.5, color) {
+  s.addText(items.map((t, i) => ({ text: t,
+    options: { bullet: { code: "25A0" }, breakLine: i < items.length - 1 } })), {
+    x, y: yTop, w, h, isTextBox: true, margin: 0, fontSize: size,
+    color: color || T.ink2, lineSpacingMultiple: 1.2, paraSpaceAfter: 7, valign: "top" });
+}
 
-C.slides.forEach((d, i) => {
-  const sect = sectionFor(i);
-  let s;
+pres.addSection({ title: "Deck" });
 
-  if (d.layout === "title") {
-    s = pres.addSlide({ masterName: "DARK", sectionTitle: sect });
-    txt(s, "MBA680  |  BEHAVIORAL FINANCE", { x: M, y: 1.55, w: CW, h: 0.34,
-      fontSize: 13, bold: true, color: T.amber, charSpacing: 2.4 });
-    s.addText(d.title, { placeholder: "title" });
-    txt(s, d.kicker, { x: M, y: 4.4, w: CW - 3.4, h: 0.5, fontSize: 17, italic: true,
-      color: T.ice });
-    txt(s, d.subtitle, { x: M, y: 5.25, w: CW, h: 0.34, fontSize: 12.5, color: T.ink3 });
-    txt(s, d.team.join("      "), { x: M, y: 6.0, w: CW, h: 0.38, fontSize: 14.5,
-      bold: true, color: T.white });
-    txt(s, "Indian Institute of Technology Kanpur", { x: M, y: 6.46, w: CW, h: 0.3,
-      fontSize: 11.5, color: T.ink3 });
+C.slides.forEach((d, idx) => {
+  const n = idx + 1;
+  const L = d.layout;
 
-  } else if (d.layout === "statement") {
-    s = pres.addSlide({ masterName: "DARK", sectionTitle: sect });
-    txt(s, d.title.toUpperCase(), { x: M, y: 1.35, w: CW, h: 0.34, fontSize: 13,
-      bold: true, color: T.amber, charSpacing: 2.4 });
-    txt(s, d.big, { x: M, y: 1.95, w: CW - 1.1, h: 2.1, fontSize: 34, bold: true,
-      color: T.white, lineSpacingMultiple: 1.1, valign: "top" });
-    txt(s, d.body, { x: M, y: 4.5, w: CW - 2.9, h: 1.9, fontSize: 15, color: T.ice,
-      lineSpacingMultiple: 1.25, valign: "top" });
-
-  } else if (d.layout === "cards3" || d.layout === "cards4") {
-    s = pres.addSlide({ masterName: "ACCENT", sectionTitle: sect });
-    s.addText(d.title, { placeholder: "title" });
-    let y = 1.56;
-    if (d.lead) { lead(s, d.lead, y); y += 0.56; }
-    const n = d.cards.length, gap = 0.34;
-    const cw = (CW - gap * (n - 1)) / n;
-    const ch = d.foot ? H - y - 1.18 : H - y - 0.86;
-    d.cards.forEach((c, k) => card(s, M + k * (cw + gap), y, cw, ch, c.n, c.h, c.b,
-      d.layout === "cards3"));
-    if (d.foot) txt(s, d.foot, { x: M, y: H - 1.08, w: CW, h: 0.34, fontSize: 13,
-      bold: true, color: T.navy, align: "center" });
-
-  } else if (d.layout === "table") {
-    s = pres.addSlide({ masterName: "LIGHT", sectionTitle: sect });
-    s.addText(d.title, { placeholder: "title" });
-    let y = 1.56;
-    if (d.lead) { lead(s, d.lead, y); y += 0.62; }
-    const head = d.head.map(h => ({ text: h,
-      options: { bold: true, color: T.white, fill: { color: T.navy }, fontSize: 12 } }));
-    const rows = d.rows.map((r, ri) => r.map(c => ({ text: String(c),
-      options: { color: T.ink, fontSize: 12.5,
-                 fill: { color: ri % 2 ? T.surface : T.white } } })));
-    s.addTable([head, ...rows], { x: M, y, w: CW, colW: d.head.length === 7
-        ? [1.3, 0.8, 1.5, 1.5, 1.2, 2.5, 1.1] : [0.7, 6.9, 4.3],
-      border: { type: "solid", color: T.line, pt: 1 },
-      rowH: 0.42, valign: "middle", margin: 0.09, autoPage: false });
-    if (d.foot) txt(s, d.foot, { x: M, y: H - 1.22, w: CW, h: 0.6, fontSize: 13,
-      italic: true, color: T.ink2, lineSpacingMultiple: 1.2 });
-
-  } else if (d.layout === "figure") {
-    s = pres.addSlide({ masterName: "LIGHT", sectionTitle: sect });
-    s.addText(d.title, { placeholder: "title" });
-    lead(s, d.lead, 1.5);
-    fig(s, d.image, M, 1.98, 7.3, 4.78);
-    bullets(s, d.points, { x: M + 7.62, y: 2.02, w: CW - 7.62, h: 4.7 });
-
-  } else if (d.layout === "proof") {
-    s = pres.addSlide({ masterName: "LIGHT", sectionTitle: sect });
-    s.addText(d.title, { placeholder: "title" });
-    lead(s, d.lead, 1.52);
-    s.addShape(pres.ShapeType.roundRect, { x: M, y: 2.12, w: 6.0, h: 2.1,
-      rectRadius: 0.06, fill: { color: T.navy } });
-    s.addText(d.math.map((t, i) => ({ text: t,
-      options: { breakLine: i < d.math.length - 1 } })), {
-      x: M + 0.42, y: 2.34, w: 5.2, h: 1.7, isTextBox: true, margin: 0,
-      fontFace: "Courier New", fontSize: 16, color: T.white, lineSpacingMultiple: 1.45 });
-    txt(s, d.body, { x: M + 6.5, y: 2.12, w: CW - 6.5, h: 2.6, fontSize: 14.5,
-      color: T.ink, lineSpacingMultiple: 1.22, valign: "top" });
-    s.addShape(pres.ShapeType.roundRect, { x: M, y: 4.62, w: CW, h: 1.0,
-      rectRadius: 0.06, fill: { color: T.surface }, line: { color: T.line, width: 1 } });
-    txt(s, d.callout, { x: M + 0.42, y: 4.62, w: CW - 0.84, h: 1.0, fontSize: 17,
-      bold: true, color: T.navy, valign: "middle" });
-
-  } else if (d.layout === "stat") {
-    s = pres.addSlide({ masterName: "ACCENT", sectionTitle: sect });
-    s.addText(d.title, { placeholder: "title" });
-    const n = d.stats.length, gap = 0.34, cw = (CW - gap * (n - 1)) / n;
-    d.stats.forEach((st, k) => {
-      const x = M + k * (cw + gap);
-      s.addShape(pres.ShapeType.roundRect, { x, y: 1.72, w: cw, h: 1.78,
-        rectRadius: 0.06, fill: { color: T.white }, line: { color: T.line, width: 1 } });
-      txt(s, st.v, { x, y: 1.9, w: cw, h: 1.0, fontSize: 58, bold: true,
-        color: T.navy, align: "center" });
-      txt(s, st.l, { x, y: 2.92, w: cw, h: 0.38, fontSize: 13, color: T.ink2,
-        align: "center" });
+  if (L === "title") {
+    const s = pres.addSlide({ masterName: "TITLE", sectionTitle: "Deck" });
+    s.addShape(pres.ShapeType.rect, { x: M, y: Y(5.75), w: 0.075, h: 2.2,
+      fill: { color: T.orange } });
+    txt(s, d.kicker, { x: M + 0.32, y: Y(5.78), w: CW - 1.0, h: 0.3, fontSize: 11,
+      bold: true, color: T.rule, valign: "middle" });
+    txt(s, d.title, { x: M + 0.32, y: Y(5.42), w: CW - 2.6, h: 1.3, fontSize: 31,
+      bold: true, color: T.white, valign: "top" });
+    txt(s, d.sub, { x: M + 0.32, y: Y(4.1), w: CW - 1.4, h: 0.36, fontSize: 13.5,
+      color: "C7D4E0" });
+    txt(s, d.portal, { x: M + 0.32, y: Y(3.66), w: CW - 1.4, h: 0.3, fontSize: 11,
+      color: T.rule });
+    s.addShape(pres.ShapeType.rect, { x: 0, y: Y(2.775), w: W, h: 0.055,
+      fill: { color: T.rule } });
+    txt(s, "PRESENTED BY", { x: M, y: Y(2.52), w: CW, h: 0.28, fontSize: 9.5,
+      bold: true, color: T.rule, valign: "middle" });
+    const gap = 0.2, cw = (CW - 0.6) / 4;
+    d.team.forEach((name, i) => {
+      const x = M + i * (cw + gap);
+      s.addShape(pres.ShapeType.roundRect, { x, y: Y(1.97), w: cw, h: 0.72,
+        rectRadius: 0.05, fill: { color: T.navyMid } });
+      txt(s, name, { x, y: Y(1.97), w: cw, h: 0.72, fontSize: 13, bold: true,
+        color: T.white, align: "center", valign: "middle" });
     });
-    txt(s, d.body, { x: M, y: 3.86, w: CW - 1.3, h: 1.5, fontSize: 15.5, color: T.ink,
-      lineSpacingMultiple: 1.24, valign: "top" });
-    s.addShape(pres.ShapeType.roundRect, { x: M, y: 5.5, w: CW, h: 0.92,
-      rectRadius: 0.06, fill: { color: T.navy } });
-    txt(s, d.callout, { x: M + 0.42, y: 5.5, w: CW - 0.84, h: 0.92, fontSize: 17,
-      bold: true, color: T.white, valign: "middle" });
+    s.addNotes(d.title); return;
+  }
 
-  } else if (d.layout === "close") {
-    s = pres.addSlide({ masterName: "DARK", sectionTitle: sect });
-    txt(s, "IN CLOSING", { x: M, y: 0.95, w: CW, h: 0.34, fontSize: 13, bold: true,
-      color: T.amber, charSpacing: 2.4 });
-    txt(s, d.title, { x: M, y: 1.42, w: CW - 1.2, h: 0.8, fontSize: 34, bold: true,
-      color: T.white });
-    s.addText(d.points.map((t, i) => ({ text: t,
-      options: { bullet: { code: "25CF" }, breakLine: i < d.points.length - 1 } })), {
-      x: M, y: 2.5, w: CW - 2.0, h: 3.0, isTextBox: true, margin: 0, fontSize: 15.5,
-      color: T.ice, lineSpacingMultiple: 1.2, paraSpaceAfter: 11 });
-    txt(s, d.team.join("      "), { x: M, y: 6.26, w: CW, h: 0.38, fontSize: 14,
-      bold: true, color: T.white });
+  const s = pres.addSlide({ masterName: "CONTENT", sectionTitle: "Deck" });
+  head(s, d.kicker, d.title);
+  const top = BAND + RULE + 0.3;            // top-down y of the content area
+
+  if (L === "cards+table") {
+    const gap = 0.22, cw = (CW - 0.66) / 4;
+    d.cards.forEach((c, i) => topCard(s, M + i * (cw + gap), top, cw, 1.18,
+      ACC[i % 5], c.h, c.b));
+    txt(s, d.tableTitle, { x: M, y: top + 1.34, w: CW, h: 0.3, fontSize: 13,
+      bold: true, color: T.ink });
+    table(s, M, top + 1.68, CW, d.head, d.rows, [1.5, 0.7, 1.7, 1.3, 1.0, 1.9, 1.9]);
+    txt(s, d.foot, { x: M, y: H - 0.95, w: CW, h: 0.3, fontSize: 9.5, color: T.ink3 });
+
+  } else if (L === "cards4big") {
+    const gap = 0.26, cw = (CW - gap) / 2, ch = (H - top - 0.75 - gap) / 2;
+    d.cards.forEach((c, i) => sideCard(s, M + (i % 2) * (cw + gap),
+      top + Math.floor(i / 2) * (ch + gap), cw, ch, ACC[i % 5], c.h, c.b, 13, 10.5));
+
+  } else if (L === "method") {
+    const cw = CW * 0.48, gap = CW - 2 * cw;
+    const ch = (H - top - 0.72 - 3 * 0.14) / 4;
+    d.cards.forEach((c, i) => sideCard(s, M, top + i * (ch + 0.14), cw, ch,
+      ACC[i % 5], c.h, c.b, 11.5, 9.5));
+    const x2 = M + cw + gap;
+    txt(s, d.tableTitle, { x: x2, y: top, w: cw, h: 0.3, fontSize: 13, bold: true, color: T.ink });
+    table(s, x2, top + 0.34, cw, d.head, d.rows, [1.1, 2.4, 2.0], 9);
+    txt(s, d.foot, { x: x2, y: H - 1.1, w: cw, h: 0.5, fontSize: 9.5, bold: true, color: T.ink });
+
+  } else if (L === "table+figure") {
+    const cw = CW * 0.49, x2 = M + CW - cw;
+    txt(s, d.tableTitle, { x: M, y: top, w: cw, h: 0.3, fontSize: 13, bold: true, color: T.ink });
+    table(s, M, top + 0.34, cw, d.head, d.rows, [1.2, 2.6, 0.8, 1.2]);
+    bullets(s, M, top + 2.35, d.bullets, cw, 1.6, 10);
+    fig(s, d.image, x2, top, cw, 2.6);
+    sideCard(s, x2, top + 2.86, cw, 1.5, "orange", d.card.h, d.card.b, 12.5, 10);
+
+  } else if (L === "figure+table") {
+    const cw = CW * 0.50, x2 = M + CW - cw;
+    txt(s, d.lead, { x: M, y: top, w: cw, h: 0.42, fontSize: 11, italic: true, color: T.ink2 });
+    fig(s, d.image, M, top + 0.46, cw, 2.95);
+    bullets(s, M, top + 3.5, d.bullets, cw, 1.6, 10);
+    txt(s, d.tableTitle, { x: x2, y: top, w: cw, h: 0.3, fontSize: 13, bold: true, color: T.ink });
+    table(s, x2, top + 0.34, cw, d.head, d.rows,
+      d.head.length === 5 ? [1.2, 1.6, 1.2, 1.0, 1.7] : d.head.map(() => 1.2));
+
+  } else if (L === "table2+figure") {
+    const cw = CW * 0.52, x2 = M + CW - CW * 0.44;
+    txt(s, d.lead, { x: M, y: top, w: cw, h: 0.5, fontSize: 11, italic: true, color: T.ink2 });
+    table(s, M, top + 0.56, cw, d.headA, d.rowsA, [1.5, 0.9, 0.8, 2.6]);
+    table(s, M, top + 2.3, cw, d.headB, d.rowsB, [1.4, 0.6, 1.3, 1.2, 0.9, 1.0]);
+    fig(s, d.image, x2, top, CW * 0.44, 3.0);
+    sideCard(s, x2, top + 3.24, CW * 0.44, 1.85, "teal", d.card.h, d.card.b, 12.5, 10);
+
+  } else if (L === "two-cards") {
+    const cw = (CW - 0.3) / 2, x2 = M + cw + 0.3, ch = 0.86;
+    txt(s, d.leftTitle, { x: M, y: top, w: cw, h: 0.3, fontSize: 13, bold: true, color: T.ink });
+    txt(s, d.rightTitle, { x: x2, y: top, w: cw, h: 0.3, fontSize: 13, bold: true, color: T.ink });
+    d.left.forEach((c, i) => sideCard(s, M, top + 0.36 + i * (ch + 0.14), cw, ch,
+      "teal", c.h, c.b, 12, 10));
+    d.right.forEach((c, i) => {
+      const y = top + 0.36 + i * (ch + 0.14);
+      s.addShape(pres.ShapeType.rect, { x: x2, y, w: cw, h: ch, fill: { color: T.panel } });
+      s.addShape(pres.ShapeType.rect, { x: x2, y, w: 0.62, h: ch,
+        fill: { color: T[ACC[i % 5]] } });
+      txt(s, c.n, { x: x2, y, w: 0.62, h: ch, fontSize: 15, bold: true, color: T.white,
+        align: "center", valign: "middle" });
+      txt(s, c.b, { x: x2 + 0.78, y: y + 0.1, w: cw - 1.0, h: 0.46, fontSize: 10,
+        color: T.ink, valign: "top" });
+      txt(s, c.i, { x: x2 + 0.78, y: y + ch - 0.34, w: cw - 1.0, h: 0.26, fontSize: 9,
+        bold: true, color: T[ACC[i % 5]], valign: "middle" });
+    });
+    txt(s, d.foot, { x: M, y: top + 0.36 + 4 * ch + 3 * 0.14 + 0.16, w: CW, h: 0.4,
+      fontSize: 10, italic: true, color: T.ink2 });
+
+  } else if (L === "figure+cards") {
+    const cw = CW * 0.46, x2 = M + CW - CW * 0.51;
+    fig(s, d.image, M, top, cw, 3.0);
+    sideCard(s, M, top + 3.24, cw, 1.25, "teal", d.card.h, d.card.b, 12.5, 10);
+    const ch = (H - top - 0.72 - 3 * 0.12) / 4;
+    d.cards.forEach((c, i) => sideCard(s, x2, top + i * (ch + 0.12), CW * 0.51, ch,
+      ACC[i % 5], c.h, c.b, 11.5, 9.5));
+
+  } else if (L === "cards3") {
+    txt(s, d.lead, { x: M, y: top, w: CW, h: 0.4, fontSize: 11.5, italic: true, color: T.ink2 });
+    const gap = 0.3, cw = (CW - 2 * gap) / 3, yTop = top + 0.5;
+    const ch = H - 1.55 - yTop;
+    d.cards.forEach((c, i) => sideCard(s, M + i * (cw + gap), yTop, cw, ch,
+      ACC[i % 5], c.h, c.b, 14, 11));
+    s.addShape(pres.ShapeType.rect, { x: M, y: H - 1.32, w: CW, h: 0.6,
+      fill: { color: T.navy } });
+    txt(s, d.foot, { x: M, y: H - 1.32, w: CW, h: 0.6, fontSize: 13, bold: true,
+      color: T.white, align: "center", valign: "middle" });
+
+  } else if (L === "close") {
+    const gap = 0.18, cw = (CW - 4 * gap) / 5, ch = 1.55;
+    d.cards.forEach((c, i) => topCard(s, M + i * (cw + gap), top, cw, ch,
+      ACC[i % 5], c.h, c.b));
+    bullets(s, M, top + ch + 0.42, d.points, CW, 1.8, 11, T.ink);
+    s.addShape(pres.ShapeType.rect, { x: M, y: H - 1.4, w: CW, h: 0.62,
+      fill: { color: T.navy } });
+    txt(s, d.quote, { x: M, y: H - 1.4, w: CW, h: 0.62, fontSize: 13.5, bold: true,
+      color: T.white, align: "center", valign: "middle" });
   }
 
   s.addNotes(d.title);
