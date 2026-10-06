@@ -95,7 +95,7 @@ def side_card(ax, x, y, w, h, accent, head, body, hs=12.5, bs=10.5):
        color=hx("ink2"), lh=1.38)
 
 
-def table(ax, x, y, w, head, rows, widths, fs=10, hfs=9.5, rowmin=0.36):
+def table(ax, x, y, w, head, rows, widths, fs=10, hfs=9.5, rowmin=0.36, rowh=None):
     scale = w / sum(widths)
     widths = [v * scale for v in widths]
     xs = [x]
@@ -109,7 +109,7 @@ def table(ax, x, y, w, head, rows, widths, fs=10, hfs=9.5, rowmin=0.36):
     yy = y - hh
     for ri, row in enumerate(rows):
         cells = [wrap(c, cw - 0.16, fs) for cw, c in zip(widths, row)]
-        rh = max(rowmin, 0.19 * max(len(c.split("\n")) for c in cells) + 0.18)
+        rh = rowh or max(rowmin, 0.19 * max(len(c.split("\n")) for c in cells) + 0.18)
         if ri % 2 == 0:
             ax.add_patch(Rectangle((x, yy - rh), w, rh, fc="#EAF4F3", ec="none", zorder=1))
         for cx, cw, c in zip(xs, widths, cells):
@@ -141,6 +141,41 @@ def bullets(ax, x, y, items, inches, size=10.5, color=None, accent="rule"):
     return y
 
 
+GAP = 0.16
+
+
+def blocks_col(ax, x, w, ytop, blks):
+    """Render a column of blocks top-down. Every block carries its own height so
+    the pptx renderer can place the same blocks at the same coordinates."""
+    y = ytop
+    for b in blks:
+        k = b["k"]
+        if k == "tt":
+            T_(ax, x, y, b["text"], size=b.get("size", 12.5), weight="bold", color=hx("ink"))
+            y -= 0.14
+        elif k == "table":
+            rowh = b.get("rowh", 0.34)
+            table(ax, x, y, w, b["head"], b["rows"], b["widths"],
+                  fs=b.get("fs", 9.5), hfs=b.get("fs", 9.5), rowh=rowh)
+            y -= 0.40 + rowh * len(b["rows"])
+        elif k == "card":
+            side_card(ax, x, y - b["h"], w, b["h"], b.get("acc", "teal"), b["head"],
+                      b["body"], hs=b.get("hs", 12), bs=b.get("bs", 10))
+            y -= b["h"]
+        elif k == "img":
+            put_fig(ax, b["file"], x, y - b["h"], w, b["h"])
+            y -= b["h"]
+        elif k == "bul":
+            bullets(ax, x, y, b["items"], w, size=b.get("size", 10))
+            y -= b["h"]
+        elif k == "note":
+            WT(ax, x, y, b["text"], w, size=b.get("size", 9.5), color=hx("ink3"),
+               style="italic")
+            y -= b["h"]
+        y -= GAP
+    return y
+
+
 # ----------------------------------------------------------------- layouts
 def render(d, n, pdf):
     L = d["layout"]
@@ -169,7 +204,23 @@ def render(d, n, pdf):
     footer(ax, n)
     top = H - BAND - RULE - 0.3
 
-    if L == "cards+table":
+    if L == "blocks":
+        y0 = top
+        if d.get("lead"):
+            WT(ax, M, y0, d["lead"], CW, size=11, style="italic", color=hx("ink2"))
+            y0 -= 0.34
+        if d.get("step"):
+            ax.add_patch(Rectangle((M, y0 - 0.02), 0.9, 0.02, fc=hx("rule"), ec="none"))
+        xs, ws = [], []
+        cx = M
+        for c in d["cols"]:
+            ws.append(CW * c["w"])
+            xs.append(cx)
+            cx += CW * c["w"] + (CW * d.get("gap", 0.03))
+        for x, w, c in zip(xs, ws, d["cols"]):
+            blocks_col(ax, x, w, y0, c["blocks"])
+
+    elif L == "cards+table":
         gap, cw = 0.22, (CW - 0.66) / 4
         for i, c in enumerate(d["cards"]):
             topbar_card(ax, M + i * (cw + gap), top - 1.18, cw, 1.18, ACC[i % 5], c["h"], c["b"])

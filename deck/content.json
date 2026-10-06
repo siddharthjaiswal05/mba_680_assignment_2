@@ -36,7 +36,7 @@
    "layout": "title",
    "kicker": "BEHAVIORAL FINANCE (MBA680)  |  GROUP PROJECT",
    "title": "Personal Investment Advisor and Robo-Advisory Project",
-   "sub": "Steps 1 to 6, estimated from the fielded peer-group survey responses",
+   "sub": "A step by step walk-through of Steps 1 to 6, with the survey questions used at each step",
    "portal": "Portal: siddharthjaiswal05.github.io/mba_680_assignment_2",
    "team": [
     "Abhinav Raj",
@@ -46,471 +46,1288 @@
    ]
   },
   {
-   "layout": "cards+table",
-   "kicker": "STEP 1: SETUP",
-   "title": "Project Overview and Participants",
-   "cards": [
+   "layout": "blocks",
+   "kicker": "THE WORK, END TO END",
+   "title": "The Six Steps at a Glance",
+   "lead": "The map. Each of the next nine slides takes one step and shows the questions, the method and the result together.",
+   "cols": [
     {
-     "h": "Peer group",
-     "b": "4 respondents, identified by roll number"
-    },
-    {
-     "h": "Instrument",
-     "b": "Class form: R1-R8, T1-T6, 30-item BFI-2 subset, U1-U6, V1-V6"
-    },
-    {
-     "h": "Market inputs",
-     "b": "60-stock maximum-Sharpe portfolio from Problem Statement 1"
-    },
-    {
-     "h": "Methods",
-     "b": "Expected utility, prospect theory, behavioral portfolio theory"
-    }
-   ],
-   "tableTitle": "Participants",
-   "head": [
-    "Roll",
-    "Age",
-    "Investable wealth",
-    "Experience",
-    "Horizon",
-    "Primary goal",
-    "Step 5 status"
-   ],
-   "rows": [
-    [
-     "251250039",
-     "25",
-     "Rs 90,000",
-     "Moderate",
-     "5 yrs",
-     "Wealth creation",
-     "Complete"
-    ],
-    [
-     "251250047",
-     "24",
-     "Rs 2 lakh",
-     "None",
-     "10 yrs",
-     "Wealth creation",
-     "Re-elicitation scheduled"
-    ],
-    [
-     "251250002",
-     "25",
-     "Rs 10 lakh",
-     "Limited",
-     "6 yrs",
-     "Wealth creation",
-     "Complete"
-    ],
-    [
-     "251250030",
-     "29",
-     "Rs 1 lakh",
-     "Limited",
-     "15 yrs",
-     "Specified goal",
-     "Re-elicitation scheduled"
-    ]
-   ],
-   "foot": "Every figure is computed directly from the submitted responses, so each result traces back to an answer a participant actually gave."
-  },
-  {
-   "layout": "cards4big",
-   "kicker": "SUMMARY",
-   "title": "Four Key Findings",
-   "cards": [
-    {
-     "h": "1. Risk aversion is best read from the utility curve",
-     "b": "Every R1-R8 row is expected-value neutral, so the ladder reveals a pattern rather than a degree. Two respondents switch part way, at R4 and R3, which is precisely what prospect theory predicts. We therefore estimate risk aversion from the utility curve, where it is sharply identified."
-    },
-    {
-     "h": "2. We extended the instrument to capture loss aversion",
-     "b": "Each V1-V6 row is a double-or-nothing gamble, so the certain amount cancels and the row reveals curvature. We added a mixed gain-and-loss gamble, which places the two limbs on a common scale and delivers lambda, the central parameter of prospect theory."
-    },
-    {
-     "h": "3. Three value rows measure one parameter, so we report its reliability",
-     "b": "All three imply the same curvature. Roll 251250039 answered 0.40, 0.45 and 0.70, implying 1.32, 1.15, 0.51. Reporting the spread of 0.81 alongside the mean of 1.00 turns a hidden error into a measured one."
-    },
-    {
-     "h": "4. The return assumption moves the answer more than the client does",
-     "b": "Both respondents with a complete utility curve want more than 100% equity under every input set, so the no-borrowing cap sets the allocation. The live question is how much of the 24.9% Problem Statement 1 return to carry forward."
+     "w": 1.0,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Every step, the part of the form it used, and what it produced"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Step",
+        "What it required",
+        "Part of the form used",
+        "How it was done",
+        "What came out"
+       ],
+       "rows": [
+        [
+         "1",
+         "Pick a peer group and build the survey",
+         "Section 1, About you",
+         "Eight profile questions, roll number instead of a name",
+         "Four anonymous investor profiles"
+        ],
+        [
+         "2",
+         "Measure the attitude to risk",
+         "Section 2, eight ladder rows",
+         "A sure amount against a double or nothing coin flip",
+         "A risk pattern for each person"
+        ],
+        [
+         "3",
+         "Measure the attitude to waiting",
+         "Section 3, six now or later rows",
+         "Rs 10,000 today against a larger amount later",
+         "A yearly discount rate for each person"
+        ],
+        [
+         "4",
+         "Fit the curves and score the personality",
+         "Sections 4, 5 and 6",
+         "Probability equivalence, then a least squares fit; BFI-2 scored by facet",
+         "Risk aversion A, curvatures alpha and beta, five domain scores"
+        ],
+        [
+         "5",
+         "Build the portfolio",
+         "Nothing new, it reuses Steps 2 to 4",
+         "Maximise E(r) minus half A sigma squared along the capital allocation line",
+         "An advised equity weight for each person"
+        ],
+        [
+         "6",
+         "Write the advice and ship the tool",
+         "Section 4 scores plus Section 7",
+         "Rules that fire on the respondent's own answers",
+         "Personal commentary and a live portal"
+        ]
+       ],
+       "widths": [
+        0.4,
+        2.3,
+        2.1,
+        3.4,
+        2.6
+       ],
+       "rowh": 0.52,
+       "fs": 9
+      },
+      {
+       "k": "note",
+       "text": "The seven Section 7 questions are our own addition to the class form. They are introduced on the Step 5 behavioral slide, where they are used.",
+       "h": 0.4
+      }
+     ]
     }
    ]
   },
   {
-   "layout": "method",
-   "kicker": "HOW EACH PARAMETER IS ESTIMATED",
-   "title": "Method and Data Notes",
-   "cards": [
+   "layout": "blocks",
+   "kicker": "STEP 1 OF 6",
+   "title": "Choose the Peer Group and Build the Survey",
+   "lead": "Requirement: field an investor survey on a peer group and record it in a form that an estimator can read.",
+   "gap": 0.03,
+   "cols": [
     {
-     "h": "Risk ladder, classified by pattern",
-     "b": "Prefer certain X if u(w0+X) > 0.5 u(w0+2X) + 0.5 u(w0). By Jensen's inequality this holds at every X or at none, so the switch point is read as a pattern."
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "The eight questions in Section 1, as they appeared"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Question on the form",
+        "Answer type"
+       ],
+       "rows": [
+        [
+         "Roll number",
+         "Text, used instead of a name"
+        ],
+        [
+         "Age",
+         "Years"
+        ],
+        [
+         "Money coming in each month",
+         "One of five bands"
+        ],
+        [
+         "Money you can invest (Rs)",
+         "Rupees"
+        ],
+        [
+         "How much investing have you done?",
+         "None to Substantial"
+        ],
+        [
+         "How many years will you keep it invested?",
+         "Years"
+        ],
+        [
+         "What is the money mainly for?",
+         "One of four goals"
+        ],
+        [
+         "Anything that limits you?",
+         "Optional free text"
+        ]
+       ],
+       "widths": [
+        3.0,
+        1.5
+       ],
+       "rowh": 0.36,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.05,
+       "head": "How it was done",
+       "body": "Fielded to four classmates through the portal. The export of their answers is the file the estimator reads.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
     },
     {
-     "h": "Utility curve, by probability equivalence",
-     "b": "U(A) = 0 and U(B) = 1, so U(X) = p at indifference. Fitted with the lecture's log form and a CRRA form; the CRRA coefficient is the A used in Step 5."
-    },
-    {
-     "h": "Value function",
-     "b": "At indifference v(X) = p v(2X), so alpha = -log2(p). The certain amount cancels, which is what makes each curvature cleanly identified."
-    },
-    {
-     "h": "Step 5 portfolio",
-     "b": "Maximise U = E(r) - 0.5 A sigma^2 along the capital allocation line: y* = [E(rP) - rf] / (A sigmaP^2), with borrowing capped at zero."
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "What came back"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Roll",
+        "Investable wealth",
+        "Experience",
+        "Horizon",
+        "Primary goal"
+       ],
+       "rows": [
+        [
+         "251250039",
+         "Rs 90,000",
+         "Moderate",
+         "5 yrs",
+         "Wealth creation"
+        ],
+        [
+         "251250047",
+         "Rs 2 lakh",
+         "None",
+         "10 yrs",
+         "Wealth creation"
+        ],
+        [
+         "251250002",
+         "Rs 10 lakh",
+         "Limited",
+         "6 yrs",
+         "Wealth creation"
+        ],
+        [
+         "251250030",
+         "Rs 1 lakh",
+         "Limited",
+         "15 yrs",
+         "Specified goal"
+        ]
+       ],
+       "widths": [
+        1.1,
+        1.3,
+        1.2,
+        0.8,
+        1.5
+       ],
+       "rowh": 0.4,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.08,
+       "head": "How the step was completed",
+       "body": "Four responses collected and transcribed into one machine readable file.",
+       "acc": "orange",
+       "hs": 12,
+       "bs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.08,
+       "head": "Output of Step 1",
+       "body": "engine/responses_real.json, the single input to every later step.",
+       "acc": "green",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
     }
-   ],
-   "tableTitle": "Data notes and follow-ups",
-   "head": [
-    "Roll",
-    "Note",
-    "Action"
-   ],
-   "rows": [
-    [
-     "251250047",
-     "Utility amounts of Rs 50k to 85k sit below the stated lower endpoint of Rs 1 lakh",
-     "Re-elicit U1-U6 inside the A to B range"
-    ],
-    [
-     "251250030",
-     "U1-U4 left blank and V1-V6 recorded in rupees rather than probabilities",
-     "Re-administer Sections 4 and 4.9"
-    ],
-    [
-     "251250002",
-     "Reference amount W0 not stated",
-     "Value curve drawn in relative terms"
-    ],
-    [
-     "251250047",
-     "Reference amount W0 not stated",
-     "Same treatment"
-    ],
-    [
-     "251250039",
-     "Time answers mildly non-monotonic",
-     "Midpoint reported as the estimate"
-    ]
-   ],
-   "foot": "Step 5 runs on the 2 respondents with a complete utility curve, and the remaining two are scheduled for a short re-elicitation."
-  },
-  {
-   "layout": "table+figure",
-   "kicker": "STEPS 2 AND 3",
-   "title": "Revealed Risk and Time Preference",
-   "tableTitle": "Risk ladder R1 to R8",
-   "head": [
-    "Roll",
-    "Pattern",
-    "Fits EU",
-    "Note"
-   ],
-   "rows": [
-    [
-     "251250039",
-     "Risk averse at low stakes and risk seeking at high stakes",
-     "No",
-     "Switches at R4"
-    ],
-    [
-     "251250047",
-     "Consistently risk averse",
-     "Yes",
-     "A curvature"
-    ],
-    [
-     "251250002",
-     "Risk seeking at low stakes and risk averse at high stakes",
-     "No",
-     "Switches at R3"
-    ],
-    [
-     "251250030",
-     "Consistently risk seeking",
-     "Yes",
-     "A curvature"
-    ]
-   ],
-   "image": "c4_discount.png",
-   "card": {
-    "h": "Patience is the striking result",
-    "b": "Every respondent discounts at a rate well above any available return, and roll 251250030 declines even 34.2% a year. That points to a genuine near-term cash need or a shorter real horizon, and it is worth a conversation before a long-horizon plan is set."
-   },
-   "bullets": [
-    "Every rung is expected-value neutral, so the ladder maps a pattern rather than a degree.",
-    "The two switches are exactly what prospect theory anticipates.",
-    "Risk aversion is taken from the utility curve, where it is identified."
    ]
   },
   {
-   "layout": "figure+table",
-   "kicker": "STEP 4",
-   "title": "Elicited Utility Curves",
-   "image": "c1_utility.png",
-   "lead": "Probability equivalence, exactly as the Week 2 to 3 lecture sets it out.",
-   "tableTitle": "CRRA fit",
-   "head": [
-    "Roll",
-    "Range A to B",
-    "Risk aversion A",
-    "Fit R2",
-    "Status"
-   ],
-   "rows": [
-    [
-     "251250039",
-     "Rs 10,000 to Rs 50,000",
-     "0.66",
-     "0.202",
-     "Concave, risk averse"
-    ],
-    [
-     "251250047",
-     "Pending",
-     "Pending",
-     "Pending",
-     "Re-elicitation scheduled"
-    ],
-    [
-     "251250002",
-     "Rs 10,000 to Rs 50,000",
-     "1.18",
-     "0.948",
-     "Concave, risk averse"
-    ],
-    [
-     "251250030",
-     "Pending",
-     "Pending",
-     "Pending",
-     "Re-elicitation scheduled"
-    ]
-   ],
-   "bullets": [
-    "The dots are the elicited points and the solid line is the fitted curve.",
-    "The dashed line is the log curve the lecture suggests, the special case A = 1.",
-    "Roll 251250039 fits 0.66 and roll 251250002 fits 1.18.",
-    "That coefficient is exactly the A in U = E(r) - 0.5 A sigma squared, so it feeds Step 5 directly."
+   "layout": "blocks",
+   "kicker": "STEP 2 OF 6",
+   "title": "Measure the Attitude to Risk",
+   "lead": "Requirement: put a sure amount against a fair gamble and see which one the respondent takes, row by row.",
+   "gap": 0.03,
+   "cols": [
+    {
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Section 2, all eight rows exactly as asked"
+      },
+      {
+       "k": "table",
+       "head": [
+        "#",
+        "A: you get for sure",
+        "B: coin flip"
+       ],
+       "rows": [
+        [
+         "1",
+         "Rs 10,000",
+         "Rs 20,000 or nothing, 50:50"
+        ],
+        [
+         "2",
+         "Rs 12,000",
+         "Rs 24,000 or nothing, 50:50"
+        ],
+        [
+         "3",
+         "Rs 15,000",
+         "Rs 30,000 or nothing, 50:50"
+        ],
+        [
+         "4",
+         "Rs 20,000",
+         "Rs 40,000 or nothing, 50:50"
+        ],
+        [
+         "5",
+         "Rs 25,000",
+         "Rs 50,000 or nothing, 50:50"
+        ],
+        [
+         "6",
+         "Rs 30,000",
+         "Rs 60,000 or nothing, 50:50"
+        ],
+        [
+         "7",
+         "Rs 40,000",
+         "Rs 80,000 or nothing, 50:50"
+        ],
+        [
+         "8",
+         "Rs 50,000",
+         "Rs 1 lakh or nothing, 50:50"
+        ]
+       ],
+       "widths": [
+        0.3,
+        1.1,
+        1.9
+       ],
+       "rowh": 0.34,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.2,
+       "head": "How it was done",
+       "body": "The sure amount equals the gamble's average on every row, so one utility curve means the same side all eight times. We read the pattern of the picks.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
+    },
+    {
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "img",
+       "file": "c3_risk_ladder.png",
+       "h": 1.85
+      },
+      {
+       "k": "card",
+       "h": 1.3,
+       "head": "How the step was completed",
+       "body": "All four patterns were classified. 251250047 took the sure amount every time and 251250030 took the coin flip every time.",
+       "acc": "orange",
+       "hs": 12,
+       "bs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.3,
+       "head": "What it told us",
+       "body": "251250039 and 251250002 switch part way down, at rows 4 and 3, exactly as prospect theory predicts.",
+       "acc": "green",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
+    }
    ]
   },
   {
-   "layout": "figure+table",
-   "kicker": "STEP 4",
-   "title": "Value Functions and What They Reveal",
-   "image": "c2_value.png",
-   "lead": "Gain and loss curvature, estimated from the double-or-nothing rows.",
-   "tableTitle": "Prospect theory parameters",
-   "head": [
-    "Roll",
-    "Gain alpha",
-    "Loss beta",
-    "Spread, gains",
-    "Spread, losses"
-   ],
-   "rows": [
-    [
-     "251250039",
-     "1.00",
-     "2.30",
-     "0.81",
-     "1.10"
-    ],
-    [
-     "251250047",
-     "1.28",
-     "1.93",
-     "0.51",
-     "0.32"
-    ],
-    [
-     "251250002",
-     "0.68",
-     "1.66",
-     "0.49",
-     "1.64"
-    ],
-    [
-     "251250030",
-     "Pending",
-     "Pending",
-     "Pending",
-     "Pending"
-    ]
-   ],
-   "bullets": [
-    "Every loss curvature came out above one, meaning sensitivity rises as losses grow.",
-    "Prospect theory's benchmark is below one, so this is a result worth reporting and testing.",
-    "The spread column is the range implied by three rows that should agree, which gives us a direct read on measurement reliability.",
-    "A second pass on the loss rows would settle whether the pattern is real."
+   "layout": "blocks",
+   "kicker": "STEP 3 OF 6",
+   "title": "Measure the Attitude to Waiting",
+   "lead": "Requirement: offer money now against more money later and find the return that makes waiting worthwhile.",
+   "gap": 0.03,
+   "cols": [
+    {
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Section 3, all six rows exactly as asked"
+      },
+      {
+       "k": "table",
+       "head": [
+        "#",
+        "Take now",
+        "Or wait and get",
+        "Wait how long"
+       ],
+       "rows": [
+        [
+         "1",
+         "Rs 10,000",
+         "Rs 10,500",
+         "1 year"
+        ],
+        [
+         "2",
+         "Rs 10,000",
+         "Rs 11,000",
+         "1 year"
+        ],
+        [
+         "3",
+         "Rs 10,000",
+         "Rs 12,000",
+         "1 year"
+        ],
+        [
+         "4",
+         "Rs 10,000",
+         "Rs 13,000",
+         "1 year"
+        ],
+        [
+         "5",
+         "Rs 10,000",
+         "Rs 15,000",
+         "2 years"
+        ],
+        [
+         "6",
+         "Rs 10,000",
+         "Rs 18,000",
+         "2 years"
+        ]
+       ],
+       "widths": [
+        0.3,
+        0.9,
+        1.1,
+        0.9
+       ],
+       "rowh": 0.34,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.5,
+       "head": "How it was done",
+       "body": "Each row implies a yearly return. The lowest offer waited for and the highest one turned down bracket the personal discount rate, and the midpoint of that bracket is the point estimate.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
+    },
+    {
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "img",
+       "file": "c4_discount.png",
+       "h": 1.85
+      },
+      {
+       "k": "card",
+       "h": 1.3,
+       "head": "How the step was completed",
+       "body": "A discount rate was produced for all four. 251250039 came out near 21.2% a year and 251250002 near 15.0%.",
+       "acc": "orange",
+       "hs": 12,
+       "bs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.3,
+       "head": "What it told us",
+       "body": "Every rate sits above any return on offer, and 251250030 preferred cash at every rung. Worth a conversation about the real horizon.",
+       "acc": "green",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
+    }
    ]
   },
   {
-   "layout": "table2+figure",
-   "kicker": "STEP 5",
-   "title": "Portfolio Recommendations",
-   "lead": "The risky asset is the Problem Statement 1 maximum-Sharpe portfolio, 18.0% volatility against a 6.5% risk-free rate.",
-   "headA": [
-    "Input set",
-    "Return",
-    "Sharpe",
-    "What it assumes"
-   ],
-   "rowsA": [
-    [
-     "PS1 as reported",
-     "24.9%",
-     "1.03",
-     "The PS1 averages repeat out of sample"
-    ],
-    [
-     "Base case, advised",
-     "15.2%",
-     "0.49",
-     "A quarter of the screening premium survives"
-    ],
-    [
-     "Stress case",
-     "12.0%",
-     "0.31",
-     "The market return alone"
-    ]
-   ],
-   "headB": [
-    "Roll",
-    "A",
-    "Unconstrained y*",
-    "Advised equity",
-    "Return",
-    "Volatility"
-   ],
-   "rowsB": [
-    [
-     "251250039",
-     "0.66",
-     "4.11x",
-     "100%",
-     "15.2%",
-     "18.0%"
-    ],
-    [
-     "251250047",
-     "Pending",
-     "Pending",
-     "Pending",
-     "Pending",
-     "Pending"
-    ],
-    [
-     "251250002",
-     "1.18",
-     "2.29x",
-     "100%",
-     "15.2%",
-     "18.0%"
-    ],
-    [
-     "251250030",
-     "Pending",
-     "Pending",
-     "Pending",
-     "Pending",
-     "Pending"
-    ]
-   ],
-   "image": "c7_scenarios.png",
-   "card": {
-    "h": "The cap, not the preference, sets the answer",
-    "b": "Both respondents with a complete curve would borrow, so both are advised to hold 100% of their corpus in the Problem Statement 1 portfolio: Rs 90,000 and Rs 10 lakh. Volatility is carried across untouched because it is the reliable half of the estimate."
-   }
+   "layout": "blocks",
+   "kicker": "STEP 4 OF 6, PART 1",
+   "title": "Fit the Utility Curve",
+   "lead": "Requirement: elicit a utility curve over wealth by the probability equivalence method from the lecture.",
+   "gap": 0.03,
+   "cols": [
+    {
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Section 5, with one respondent's own answers alongside"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Item",
+        "Question on the form",
+        "251250039 said"
+       ],
+       "rows": [
+        [
+         "A",
+         "The lowest amount that feels relevant to you",
+         "Rs 10,000"
+        ],
+        [
+         "B",
+         "The highest amount that feels relevant to you",
+         "Rs 50,000"
+        ],
+        [
+         "U1",
+         "Rs 30,000 for sure, or play the game. What winning chance makes the two feel the same?",
+         "70 in 100"
+        ],
+        [
+         "U2",
+         "Rs 40,000 for sure, or play the game. What winning chance makes the two feel the same?",
+         "76 in 100"
+        ],
+        [
+         "U3",
+         "Rs 45,000 for sure, or play the game. What winning chance makes the two feel the same?",
+         "80 in 100"
+        ],
+        [
+         "U4",
+         "Rs 47,999 for sure, or play the game. What winning chance makes the two feel the same?",
+         "94 in 100"
+        ]
+       ],
+       "widths": [
+        0.4,
+        3.0,
+        1.1
+       ],
+       "rowh": 0.42,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.4,
+       "head": "How it was done",
+       "body": "Set U(A) = 0 and U(B) = 1. At indifference the stated chance is the utility of the sure amount, so U(X) = p. Those points were fitted with a constant relative risk aversion curve by least squares.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
+    },
+    {
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "img",
+       "file": "c1_utility.png",
+       "h": 1.7
+      },
+      {
+       "k": "tt",
+       "text": "The fitted curves"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Roll",
+        "Range A to B",
+        "Risk aversion",
+        "Fit R2"
+       ],
+       "rows": [
+        [
+         "251250039",
+         "Rs 10,000 to Rs 50,000",
+         "0.66",
+         "0.202"
+        ],
+        [
+         "251250047",
+         "To come",
+         "To come",
+         "To come"
+        ],
+        [
+         "251250002",
+         "Rs 10,000 to Rs 50,000",
+         "1.18",
+         "0.948"
+        ],
+        [
+         "251250030",
+         "To come",
+         "To come",
+         "To come"
+        ]
+       ],
+       "widths": [
+        1.0,
+        1.6,
+        1.3,
+        0.9
+       ],
+       "rowh": 0.4,
+       "fs": 9.5
+      },
+      {
+       "k": "note",
+       "text": "Both curves came out concave, so both respondents are risk averse: A = 0.66 and A = 1.18. That coefficient is the A used directly in Step 5.",
+       "h": 0.45
+      }
+     ]
+    }
+   ]
   },
   {
-   "layout": "two-cards",
-   "kicker": "STEP 5: BEHAVIORAL PORTFOLIO THEORY",
-   "title": "Completing the Behavioral Portfolio",
-   "leftTitle": "What the layered portfolio needs",
-   "left": [
+   "layout": "blocks",
+   "kicker": "STEP 4 OF 6, PART 2",
+   "title": "Fit the Value Function Over Gains and Losses",
+   "lead": "Requirement: measure how gains and losses are coded against a reference point, as prospect theory sets it out.",
+   "gap": 0.03,
+   "cols": [
     {
-     "h": "A floor, in rupees",
-     "b": "The amount that must survive to the horizon."
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Section 6, all seven fields exactly as asked"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Item",
+        "Question on the form",
+        "Answer scale"
+       ],
+       "rows": [
+        [
+         "W0",
+         "The amount you measure gains and losses against",
+         "Rupees"
+        ],
+        [
+         "V1",
+         "Win Rs 10,000 for sure, or play for Rs 20,000",
+         "Winning chance"
+        ],
+        [
+         "V2",
+         "Win Rs 20,000 for sure, or play for Rs 40,000",
+         "Winning chance"
+        ],
+        [
+         "V3",
+         "Win Rs 30,000 for sure, or play for Rs 60,000",
+         "Winning chance"
+        ],
+        [
+         "V4",
+         "Lose Rs 10,000 for sure, or risk losing Rs 20,000",
+         "Chance of the bigger loss"
+        ],
+        [
+         "V5",
+         "Lose Rs 20,000 for sure, or risk losing Rs 40,000",
+         "Chance of the bigger loss"
+        ],
+        [
+         "V6",
+         "Lose Rs 30,000 for sure, or risk losing Rs 60,000",
+         "Chance of the bigger loss"
+        ]
+       ],
+       "widths": [
+        0.4,
+        3.0,
+        1.2
+       ],
+       "rowh": 0.38,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.25,
+       "head": "How it was done",
+       "body": "The gamble pays double or nothing, so v(X) = p times v(2X) at indifference. With v(x) = x to the power alpha the sure amount cancels and alpha is minus log base 2 of p.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
     },
     {
-     "h": "A tolerance for breaching it",
-     "b": "Roy's safety-first threshold."
-    },
-    {
-     "h": "An aspiration level",
-     "b": "The target that defines success."
-    },
-    {
-     "h": "Loss aversion, lambda",
-     "b": "Drives the fear term in the SP/A objective."
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "img",
+       "file": "c2_value.png",
+       "h": 1.7
+      },
+      {
+       "k": "tt",
+       "text": "The fitted parameters"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Roll",
+        "Gain alpha",
+        "Loss beta",
+        "Spread across rows"
+       ],
+       "rows": [
+        [
+         "251250039",
+         "1.00",
+         "2.30",
+         "0.81 and 1.10"
+        ],
+        [
+         "251250047",
+         "1.28",
+         "1.93",
+         "0.51 and 0.32"
+        ],
+        [
+         "251250002",
+         "0.68",
+         "1.66",
+         "0.49 and 1.64"
+        ],
+        [
+         "251250030",
+         "To come",
+         "To come",
+         "To come"
+        ]
+       ],
+       "widths": [
+        1.0,
+        1.1,
+        1.0,
+        1.6
+       ],
+       "rowh": 0.4,
+       "fs": 9.5
+      },
+      {
+       "k": "note",
+       "text": "All three gain rows measure the same curvature, so the spread between them is a direct read on how reliably the answer was given.",
+       "h": 0.45
+      }
+     ]
     }
-   ],
-   "rightTitle": "Four one-line questions, now live in the portal",
-   "right": [
-    {
-     "n": "E1",
-     "b": "A coin flip: lose Rs 10,000, or win G. How big must G be?",
-     "i": "Gives loss aversion lambda"
-    },
-    {
-     "n": "E2",
-     "b": "A 10% chance of Rs 10,000: what certain amount feels as good? Same at 90%.",
-     "i": "Gives probability weighting, the hope term in SP/A"
-    },
-    {
-     "n": "E3",
-     "b": "The smallest amount you must still have, and how often you could fall below it.",
-     "i": "Gives the safety layer and its shortfall limit"
-    },
-    {
-     "n": "E4",
-     "b": "The end amount you would call success, and what you would trade for a better shot.",
-     "i": "Gives the aspiration layer and its weight"
-    }
-   ],
-   "foot": "Adding these four turns the safety and potential split from a judgement into a measurement, and they take about a minute to answer."
+   ]
   },
   {
-   "layout": "figure+cards",
-   "kicker": "STEP 6",
-   "title": "Personality Commentary",
-   "image": "c5_personality.png",
-   "card": {
-    "h": "Personality shapes the process, not the weight",
-    "b": "Risk aversion is already measured directly, so personality is used where it actually predicts: whether a client stays with the plan."
-   },
-   "cards": [
+   "layout": "blocks",
+   "kicker": "STEP 4 OF 6, PART 3",
+   "title": "Score the Personality Profile",
+   "lead": "Requirement: collect a standard personality measure so the advice can speak to behaviour, not only to risk.",
+   "gap": 0.03,
+   "cols": [
     {
-     "h": "251250039: build in the follow-through",
-     "b": "Conscientiousness of 2.33. Automate the contribution, rebalance on a threshold, and fix review dates in advance."
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Section 4, thirty short items, one sample from each domain"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Domain",
+        "A sample item from the thirty",
+        "Scale"
+       ],
+       "rows": [
+        [
+         "Extraversion",
+         "Is outgoing, sociable.",
+         "1 to 5"
+        ],
+        [
+         "Agreeableness",
+         "Is compassionate, has a soft heart.",
+         "1 to 5"
+        ],
+        [
+         "Conscientiousness",
+         "Is systematic, likes to keep things in order.",
+         "1 to 5"
+        ],
+        [
+         "Negative emotionality",
+         "Can be tense.",
+         "1 to 5"
+        ],
+        [
+         "Open-mindedness",
+         "Is curious about many different things.",
+         "1 to 5"
+        ]
+       ],
+       "widths": [
+        1.4,
+        3.0,
+        0.7
+       ],
+       "rowh": 0.34,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.6,
+       "head": "How it was done",
+       "body": "Thirty items from the BFI-2, two per facet, chosen so all fifteen facets are covered within the thirty question cap. Reverse keyed items were flipped, facets averaged, domains averaged from their facets, then placed against the published norming means.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      },
+      {
+       "k": "note",
+       "text": "1 means not like me at all and 5 means very much like me.",
+       "h": 0.3
+      }
+     ]
     },
     {
-     "h": "251250047: methodical and calm",
-     "b": "Conscientiousness 3.83, the group's lowest negative emotionality at 1.67, and the certain amount on all eight rows. A glide path that steps equity up over time suits this well."
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "img",
+       "file": "c5_personality.png",
+       "h": 2.15
+      },
+      {
+       "k": "card",
+       "h": 1.25,
+       "head": "How the step was completed",
+       "body": "All four answered all thirty items, so every domain and facet score is complete.",
+       "acc": "orange",
+       "hs": 12,
+       "bs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.05,
+       "head": "Output of this step",
+       "body": "Five domain scores and fifteen facet scores per person.",
+       "acc": "green",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layout": "blocks",
+   "kicker": "STEP 5 OF 6",
+   "title": "Build the Mean-Variance Portfolio",
+   "lead": "Requirement: combine the measured risk aversion with the Problem Statement 1 portfolio and set the equity weight.",
+   "gap": 0.03,
+   "cols": [
+    {
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "The inputs, all carried forward rather than asked again"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Input",
+        "Value used",
+        "Where it came from"
+       ],
+       "rows": [
+        [
+         "Risky portfolio",
+         "24.9% return, 18.0% risk",
+         "Problem Statement 1"
+        ],
+        [
+         "Risk-free rate",
+         "6.5%",
+         "Treasury bill yield"
+        ],
+        [
+         "Risk aversion A",
+         "0.66 and 1.18",
+         "The Step 4 utility curve"
+        ],
+        [
+         "Borrowing",
+         "Capped at zero",
+         "Student investor constraint"
+        ]
+       ],
+       "widths": [
+        1.3,
+        1.7,
+        1.5
+       ],
+       "rowh": 0.4,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.5,
+       "head": "How it was done",
+       "body": "Maximise U = E(r) minus half A sigma squared along the capital allocation line. The optimum is y* = [E(rP) minus rf] divided by A times sigmaP squared, capped at one because borrowing is not available.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      },
+      {
+       "k": "note",
+       "text": "Three return scenarios are carried through, because the expected return is the least certain input in the whole exercise.",
+       "h": 0.45
+      }
+     ]
     },
     {
-     "h": "251250002: frame it in rupees",
-     "b": "Balanced across every domain. The switch at R3 suggests risk is judged in nominal amounts, so the downside case lands better as a rupee figure than as a percentage."
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "The recommendation, base case inputs"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Roll",
+        "A",
+        "y* uncapped",
+        "Advised equity",
+        "Return",
+        "Risk"
+       ],
+       "rows": [
+        [
+         "251250039",
+         "0.66",
+         "4.11x",
+         "100%",
+         "15.2%",
+         "18.0%"
+        ],
+        [
+         "251250047",
+         "To come",
+         "To come",
+         "To come",
+         "To come",
+         "To come"
+        ],
+        [
+         "251250002",
+         "1.18",
+         "2.29x",
+         "100%",
+         "15.2%",
+         "18.0%"
+        ],
+        [
+         "251250030",
+         "To come",
+         "To come",
+         "To come",
+         "To come",
+         "To come"
+        ]
+       ],
+       "widths": [
+        1.1,
+        0.5,
+        1.2,
+        1.2,
+        0.8,
+        0.7
+       ],
+       "rowh": 0.4,
+       "fs": 9.5
+      },
+      {
+       "k": "img",
+       "file": "c7_scenarios.png",
+       "h": 1.5
+      },
+      {
+       "k": "note",
+       "text": "Both respondents with a fitted curve want more than their whole corpus in the risky portfolio, so the cap sets the answer: hold 100%, which is Rs 90,000 and Rs 10 lakh.",
+       "h": 0.6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layout": "blocks",
+   "kicker": "STEP 5 OF 6, EXTENDED",
+   "title": "Build the Behavioral Portfolio",
+   "lead": "Requirement: go past mean-variance and size the layered portfolio that behavioral portfolio theory describes.",
+   "gap": 0.03,
+   "cols": [
+    {
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Section 7, the questions we added to the class form"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Item",
+        "Question added to the form",
+        "What it measures"
+       ],
+       "rows": [
+        [
+         "E1",
+         "A coin flip. Tails you lose Rs 10,000, heads you win G. How big must G be?",
+         "Loss aversion, lambda"
+        ],
+        [
+         "E2",
+         "A 10 in 100 chance of Rs 10,000. What sure amount feels as good? Same at 90 in 100.",
+         "Probability weighting"
+        ],
+        [
+         "E3",
+         "What is the smallest amount you must still have at the end?",
+         "The safety floor"
+        ],
+        [
+         "E4",
+         "How often could you live with falling below that amount?",
+         "Shortfall tolerance"
+        ],
+        [
+         "E5",
+         "What amount at the end would you call a success?",
+         "The aspiration level"
+        ],
+        [
+         "E6",
+         "Split 100 points between staying safe and a real shot at the big number.",
+         "Security and potential split"
+        ],
+        [
+         "E7",
+         "What would you give up to raise your chance of success by 10 points?",
+         "Weight on the aspiration"
+        ]
+       ],
+       "widths": [
+        0.4,
+        3.4,
+        1.3
+       ],
+       "rowh": 0.4,
+       "fs": 9
+      },
+      {
+       "k": "card",
+       "h": 1.1,
+       "head": "How it was done",
+       "body": "Each layer needs one number the class form does not collect, so we wrote the seven shortest questions that supply them. They take about a minute to answer.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
     },
     {
-     "h": "251250030: start with a conversation",
-     "b": "Chose the gamble throughout and preferred cash now at every rate offered. A short interview will establish the real horizon before the plan is set."
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "card",
+       "h": 1.5,
+       "head": "What the layered portfolio needs",
+       "body": "A floor in rupees, a tolerance for breaching it, an aspiration level, and loss aversion. Together they split the corpus into a safety sleeve and a potential sleeve, each priced off the same frontier.",
+       "acc": "orange",
+       "hs": 12.5,
+       "bs": 10
+      },
+      {
+       "k": "card",
+       "h": 1.5,
+       "head": "How it was completed",
+       "body": "The engine, the estimators and the layer solver are built and tested, and all seven questions are live in the portal. The code path runs end to end on worked inputs.",
+       "acc": "green",
+       "hs": 12.5,
+       "bs": 10
+      },
+      {
+       "k": "card",
+       "h": 1.3,
+       "head": "The next pass",
+       "body": "The four respondents answer the seven added questions, and the same run then prints a sized behavioral portfolio beside the mean-variance one.",
+       "acc": "purple",
+       "hs": 12.5,
+       "bs": 10
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layout": "blocks",
+   "kicker": "STEP 6 OF 6",
+   "title": "Turn the Numbers Into Advice",
+   "lead": "Requirement: write the commentary and the behavioral guidance that goes back to each respondent.",
+   "gap": 0.03,
+   "cols": [
+    {
+     "w": 0.52,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "The rules, and the answer that triggers each one"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Guidance",
+        "Fires when",
+        "Fired for"
+       ],
+       "rows": [
+        [
+         "Automate the monthly contribution",
+         "Conscientiousness below the group mean",
+         "251250039"
+        ],
+        [
+         "Fix the review dates in advance",
+         "Organization facet below 3 out of 5",
+         "251250039"
+        ],
+        [
+         "Step the equity weight up over time",
+         "Low negative emotionality and a long horizon",
+         "251250047"
+        ],
+        [
+         "Show the downside in rupees, not percent",
+         "A switch part way down the risk ladder",
+         "251250002"
+        ],
+        [
+         "Confirm the real horizon first",
+         "Cash preferred at every rate offered",
+         "251250030"
+        ]
+       ],
+       "widths": [
+        1.8,
+        2.0,
+        1.0
+       ],
+       "rowh": 0.44,
+       "fs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.56,
+       "head": "How it was done",
+       "body": "Risk aversion is already measured in Step 4, so personality is used only where it predicts something else: whether the client stays with the plan. Each rule names the answer that set it off, so nothing in the advice is unexplained.",
+       "acc": "teal",
+       "hs": 12,
+       "bs": 9.5
+      }
+     ]
+    },
+    {
+     "w": 0.45,
+     "blocks": [
+      {
+       "k": "card",
+       "h": 1.05,
+       "head": "251250039: build in the follow-through",
+       "body": "Conscientiousness 2.33. Automate the contribution and rebalance on a threshold.",
+       "acc": "teal",
+       "hs": 11.5,
+       "bs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.05,
+       "head": "251250047: methodical and calm",
+       "body": "Conscientiousness 3.83 and the group's lowest negative emotionality at 1.67. A glide path suits this well.",
+       "acc": "orange",
+       "hs": 11.5,
+       "bs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.05,
+       "head": "251250002: frame it in rupees",
+       "body": "Balanced across every domain. The switch at row 3 suggests risk is judged in nominal amounts, so show the downside as a rupee figure.",
+       "acc": "green",
+       "hs": 11.5,
+       "bs": 9.5
+      },
+      {
+       "k": "card",
+       "h": 1.05,
+       "head": "251250030: start with a conversation",
+       "body": "Took the gamble throughout and preferred cash now at every rate. A short interview will establish the real horizon before the plan is set.",
+       "acc": "purple",
+       "hs": 11.5,
+       "bs": 9.5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layout": "blocks",
+   "kicker": "WHAT WAS DELIVERED",
+   "title": "How Each Step Was Completed",
+   "lead": "The same six steps again, this time with the evidence for each one.",
+   "cols": [
+    {
+     "w": 1.0,
+     "blocks": [
+      {
+       "k": "tt",
+       "text": "Step by step, what exists at the end of the project"
+      },
+      {
+       "k": "table",
+       "head": [
+        "Step",
+        "How it was completed",
+        "Where to see it"
+       ],
+       "rows": [
+        [
+         "1. Peer group and survey",
+         "Eight profile questions fielded to four classmates, answers stored under roll numbers and exported to one file",
+         "Portal Section 1, responses_real.json"
+        ],
+        [
+         "2. Risk attitude",
+         "All eight ladder rows answered by all four; each pattern classified and the expected utility check reported",
+         "Report Section 2, figure c3"
+        ],
+        [
+         "3. Time preference",
+         "All six rows answered by all four; a discount rate bracket and a midpoint estimate produced for each",
+         "Report Section 3, figure c4"
+        ],
+        [
+         "4. Curves and personality",
+         "Utility curves fitted for two respondents, value curves for three, and all thirty personality items scored for all four",
+         "Report Section 4, figures c1, c2, c5"
+        ],
+        [
+         "5. Portfolio",
+         "Advised equity weight computed for every respondent with a fitted curve, under three return scenarios",
+         "Report Section 5, figures c6, c7"
+        ],
+        [
+         "6. Advice and tool",
+         "Written commentary per respondent, plus a live portal that fields the form and repeats the whole calculation in the browser",
+         "Report Section 6, the portal"
+        ],
+        [
+         "Beyond the brief",
+         "Seven extra questions added to the form so the behavioral layers can be sized from stated preferences",
+         "Portal Section 7"
+        ]
+       ],
+       "widths": [
+        1.5,
+        4.4,
+        2.1
+       ],
+       "rowh": 0.5,
+       "fs": 9
+      },
+      {
+       "k": "note",
+       "text": "Two respondents are scheduled for a short re-elicitation so their utility and value curves join the Step 5 run.",
+       "h": 0.4
+      }
+     ]
     }
    ]
   },
   {
    "layout": "cards3",
-   "kicker": "DELIVERABLE",
+   "kicker": "THE DELIVERABLE",
    "title": "The Robo-Advisory Portal",
-   "lead": "A single static page with no server and no sign-in, so it opens on a phone in a classroom.",
+   "lead": "One static page, no server and no sign-in, so it opens on a phone in a classroom.",
    "cards": [
     {
      "h": "Fields the whole form",
-     "b": "All six class sections plus the four extensions, written in plain English, with autosave and a one-click export of each respondent's answers."
+     "b": "All six class sections plus the seven added questions, written in plain English, with autosave and a one-click export of each respondent's answers."
     },
     {
      "h": "Fits and plots live",
@@ -518,7 +1335,7 @@
     },
     {
      "h": "Builds both portfolios",
-     "b": "The mean-variance allocation and the behavioral layers, against the real Problem Statement 1 frontier, with commentary generated from the respondent's own scores."
+     "b": "The mean-variance allocation and the behavioral layers, against the real Problem Statement 1 frontier, with commentary generated from the respondent's own answers."
     }
    ],
    "foot": "siddharthjaiswal05.github.io/mba_680_assignment_2"
@@ -530,11 +1347,11 @@
    "cards": [
     {
      "h": "Sample",
-     "b": "Four respondents, so conclusions are about the method rather than a population."
+     "b": "Four respondents, so the conclusions are about the method rather than a population."
     },
     {
      "h": "Return input",
-     "b": "The least certain input, which is why three scenarios are shown."
+     "b": "The least certain input, which is why three scenarios are carried through."
     },
     {
      "h": "Horizon",
@@ -550,10 +1367,10 @@
     }
    ],
    "points": [
+    "Every one of the six steps is traceable to the exact question that produced it, and every number in this deck is computed from a submitted answer.",
     "Risk aversion is measured from the utility curve, and the ladder is read as the pattern it genuinely reveals.",
-    "Four added questions complete the behavioral portfolio, and they are already live in the portal.",
-    "Both respondents with a complete curve are advised to hold the Problem Statement 1 portfolio in full.",
-    "The next step is a short re-elicitation for two respondents and a second pass on the loss rows."
+    "Seven added questions complete the behavioral portfolio, and they are already live in the portal.",
+    "The next pass collects those answers and re-elicits two respondents, which closes out Steps 4 and 5 for the full group."
    ],
    "quote": "Measure what the data supports, and extend the instrument where it does not.",
    "team": [

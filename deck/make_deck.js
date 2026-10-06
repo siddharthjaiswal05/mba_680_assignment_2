@@ -71,7 +71,7 @@ function topCard(s, x, yTop, w, h, accent, hd, body) {
     color: T.ink2, valign: "top", lineSpacingMultiple: 1.18 });
 }
 
-function table(s, x, yTop, w, headRow, rows, widths, fs = 9.5) {
+function table(s, x, yTop, w, headRow, rows, widths, fs = 9.5, rowh = 0.34) {
   const scale = w / widths.reduce((a, b) => a + b, 0);
   const colW = widths.map(v => v * scale);
   const hdr = headRow.map(h => ({ text: String(h), options: { bold: true, color: T.white,
@@ -81,7 +81,7 @@ function table(s, x, yTop, w, headRow, rows, widths, fs = 9.5) {
     fill: { color: ri % 2 === 0 ? "EAF4F3" : T.white } } })));
   s.addTable([hdr, ...body], { x, y: yTop, w, colW,
     border: { type: "solid", color: T.line, pt: 0.75 },
-    rowH: 0.34, margin: 0.06, autoPage: false });
+    rowH: [0.40, ...rows.map(() => rowh)], margin: 0.06, autoPage: false });
 }
 
 function fig(s, file, x, yTop, w, h) {
@@ -98,6 +98,38 @@ function bullets(s, x, yTop, items, w, h, size = 10.5, color) {
     options: { bullet: { code: "25A0" }, breakLine: i < items.length - 1 } })), {
     x, y: yTop, w, h, isTextBox: true, margin: 0, fontSize: size,
     color: color || T.ink2, lineSpacingMultiple: 1.2, paraSpaceAfter: 7, valign: "top" });
+}
+
+const GAP = 0.16;
+
+/* Render a column of blocks top-down. Mirrors blocks_col in make_deck_pdf.py:
+   every block carries its own height, so both renderers agree by construction. */
+function blocksCol(s, x, w, yTop, blks) {
+  let y = yTop;
+  blks.forEach(b => {
+    if (b.k === "tt") {
+      txt(s, b.text, { x, y, w, h: 0.26, fontSize: b.size || 12.5, bold: true, color: T.ink });
+      y += 0.14;
+    } else if (b.k === "table") {
+      const rowh = b.rowh || 0.34;
+      table(s, x, y, w, b.head, b.rows, b.widths, b.fs || 9.5, rowh);
+      y += 0.40 + rowh * b.rows.length;
+    } else if (b.k === "card") {
+      sideCard(s, x, y, w, b.h, b.acc || "teal", b.head, b.body, b.hs || 12, b.bs || 10);
+      y += b.h;
+    } else if (b.k === "img") {
+      fig(s, b.file, x, y, w, b.h);
+      y += b.h;
+    } else if (b.k === "bul") {
+      bullets(s, x, y, b.items, w, b.h, b.size || 10);
+      y += b.h;
+    } else if (b.k === "note") {
+      txt(s, b.text, { x, y, w, h: b.h, fontSize: b.size || 9.5, italic: true, color: T.ink3 });
+      y += b.h;
+    }
+    y += GAP;
+  });
+  return y;
 }
 
 pres.addSection({ title: "Deck" });
@@ -137,7 +169,20 @@ C.slides.forEach((d, idx) => {
   head(s, d.kicker, d.title);
   const top = BAND + RULE + 0.3;            // top-down y of the content area
 
-  if (L === "cards+table") {
+  if (L === "blocks") {
+    let y0 = top;
+    if (d.lead) {
+      txt(s, d.lead, { x: M, y: y0, w: CW, h: 0.3, fontSize: 11, italic: true, color: T.ink2 });
+      y0 += 0.34;
+    }
+    let cx = M;
+    d.cols.forEach(c => {
+      const w = CW * c.w;
+      blocksCol(s, cx, w, y0, c.blocks);
+      cx += w + CW * (d.gap || 0.03);
+    });
+
+  } else if (L === "cards+table") {
     const gap = 0.22, cw = (CW - 0.66) / 4;
     d.cards.forEach((c, i) => topCard(s, M + i * (cw + gap), top, cw, 1.18,
       ACC[i % 5], c.h, c.b));

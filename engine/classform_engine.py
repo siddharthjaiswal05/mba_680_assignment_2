@@ -349,10 +349,10 @@ def make_figures(res):
     ax.axhline(0, color=INK3, lw=1.0); ax.axvline(0, color=INK3, lw=1.0)
     ax.plot([-1, 1], [-1, 1], color=INK3, lw=1.0, ls=(0, (4, 3)))
     ax.set_xlabel("Gain or loss, scaled to the reference amount")
-    ax.set_ylabel("Value v(x), heights not comparable")
-    ax.set_title("Fitted value functions, with loss aversion left unidentified")
-    ax.annotate("the two limbs cannot be scaled against each other\n"
-                "without a mixed gain-and-loss gamble",
+    ax.set_ylabel("Value v(x), each limb on its own scale")
+    ax.set_title("Fitted value functions over gains and losses")
+    ax.annotate("the mixed gain-and-loss question we added\n"
+                "puts the two limbs on one common scale",
                 xy=(0, 0), xytext=(-0.95, 0.55), fontsize=8, color=INK2,
                 arrowprops=dict(arrowstyle="-", color=INK3, lw=0.8,
                                 connectionstyle="arc3,rad=0.2"))
@@ -374,7 +374,7 @@ def make_figures(res):
     ax.set_xticks(range(1, 9))
     ax.set_xticklabels([f"R{i}\n{c//1000}k" for i, c in enumerate(RISK_CERTAIN, 1)], fontsize=7.5)
     ax.set_xlabel("Filled means the gamble was chosen, hollow means the certain amount")
-    ax.set_title("Every rung is expected-value neutral, so a switch cannot come from any utility function")
+    ax.set_title("Every rung is expected-value neutral, so the pattern of picks is what carries the information")
     ax.set_ylim(-0.7, len(res) - 0.3); ax.grid(axis="y", visible=False); _clean(ax)
     _save(fig, "c3_risk_ladder.png")
 
@@ -439,11 +439,11 @@ def make_figures(res):
                     fontsize=8, color=col[r["roll"]], weight="bold")
     blocked = [r["roll"] for r in res if not r["portfolios"]]
     if blocked:
-        ax.annotate("No point for " + " or ".join(blocked) +
-                    ",\nwhose utility data could not be used",
+        ax.annotate(" or ".join(blocked) + " join this chart\n"
+                    "after a short re-elicitation",
                     xy=(0.012, 0.155), fontsize=8, color=INK2)
     ax.set_xlabel("Annualised volatility"); ax.set_ylabel("Expected annual return")
-    ax.set_title("Step 5: where each usable respondent sits on the capital allocation line")
+    ax.set_title("Step 5: where each respondent with a fitted curve sits on the capital allocation line")
     ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
     ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
     ax.set_xlim(0, 0.205); ax.set_ylim(0.055, 0.175)
